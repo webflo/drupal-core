@@ -9,19 +9,19 @@ How?
 This was done using the [git-subsplit](https://github.com/dflydev/git-subsplit)
 script by [Simensen](https://github.com/simensen)...
 
-1. Initialize the subsplit in a git repository:
+#### 1. Initialize the subsplit in a git repository:
 
 ``` bash
 $ git subsplit init https://github.com/drupal/drupal
 ```
 
-2. Update to the latests version of the remote repository:
+#### 2. Update to the latests version of the remote repository:
 
 ``` bash
 $ git subsplit update
 ```
 
-3. Publish
+#### 3. Publish
 
 ```bash
 $ git subsplit publish "

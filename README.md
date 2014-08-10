@@ -1,7 +1,7 @@
 Drupal /Core
 ============
 
-This is a git subtree split of Drupal 8's /core directory.
+This is a git subtree split of Drupal 8's `core` directory.
 
 How?
 ----
@@ -25,7 +25,13 @@ $ cd ..
 (`git subsplit update` currently does not work because the Drupal repository does not contain a master branch. See https://github.com/dflydev/git-subsplit/issues/13)
 
 #### 3. Publish
-
+Publish the `8.0.x` branch:
 ```bash
-$ git subsplit publish "core:git@github.com:tstoeckler/drupal-core.git" --heads=8.0.x --no-tags
+$ git subsplit publish "core:git@github.com:tstoeckler/drupal-core.git" --heads="8.0.x" --no-tags
 ```
+
+Publish the last two alpha releases:
+```bash
+$ git subsplit publish "core:git@github.com:tstoeckler/drupal-core.git" --tags="8.0-alpha13 8.0.0-alpha14" --no-heads
+```
+

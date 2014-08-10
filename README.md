@@ -18,13 +18,14 @@ $ git subsplit init https://github.com/drupal/drupal
 #### 2. Update to the latests version of the remote repository:
 
 ``` bash
-$ git subsplit update
+$ cd .subsplit
+$ git fetch origin
+$ cd ..
 ```
+(`git subsplit update` currently does not work because the Drupal repository does not contain a master branch. See https://github.com/dflydev/git-subsplit/issues/13)
 
 #### 3. Publish
 
 ```bash
-$ git subsplit publish "
-    core:git@github.com:robloach/core.git
-  " --heads=master
+$ git subsplit publish "core:git@github.com:tstoeckler/drupal-core.git" --heads=8.0.x --no-tags
 ```

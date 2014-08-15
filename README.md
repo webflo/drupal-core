@@ -15,7 +15,19 @@ script by [Simensen](https://github.com/simensen)...
 $ git subsplit init https://github.com/drupal/drupal
 ```
 
-#### 2. Update to the latests version of the remote repository:
+#### 2. Copy the Composer files to the `core` directory
+This is optional, but required for the generated repository to be pulled into other projects via Composer. This step needs to be repeated whenever the Composer files change upstream.
+``` bash
+$ cd .subsplit
+$ git checkout 8.0.x
+# Copy the composer.json file, replacing 'core/' with ''
+$ sed 's/core\///' <composer.json >core/composer.json
+$ cp composer.lock core/composer.lock
+$ git add core/composer.json core/composer.lock
+$ git commit -m "Copy the Composer files to the core directory."
+```
+
+#### 3. Update to the latests version of the remote repository:
 
 ``` bash
 $ cd .subsplit
@@ -24,7 +36,7 @@ $ cd ..
 ```
 (`git subsplit update` currently does not work because the Drupal repository does not contain a master branch. See https://github.com/dflydev/git-subsplit/issues/13)
 
-#### 3. Publish
+#### 4. Publish
 Publish the `8.0.x` branch:
 ```bash
 $ git subsplit publish "core:git@github.com:tstoeckler/drupal-core.git" --heads="8.0.x" --no-tags

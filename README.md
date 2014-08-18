@@ -29,7 +29,7 @@ repeated whenever the Composer files change upstream.
 ``` bash
 # Copy the composer.json file, changing the package name from 'drupal/drupal' to
 # 'drupal/drupal-core' and replacing 'core/' with ''
-$ sed 's/core\///' <composer.json >core/composer.json
+$ sed 's/drupal\/drupal/drupal\/drupal-core/' <composer.json | sed 's/core\///' >core/composer.json
 $ cp composer.lock core/composer.lock
 $ git add core/composer.json core/composer.lock
 $ git commit -m "Copy the Composer files to the core directory."

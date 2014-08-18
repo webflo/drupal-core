@@ -15,6 +15,8 @@ $ cd drupal-core
 
 Perform a split for a tag, for example the [8.0.0-alpha14] (https://github.com/drupal/drupal/tree/8.0.0-alpha14) tag:
 ``` bash
+$ git clone https://github.com/drupal/drupal drupal-core
+$ cd drupal-core
 # Because we want to apply additional commits to a tag (see below), we cannot
 # checkout the tag directly.
 $ git checkout `git show-ref --hash 8.0.0-alpha14`
@@ -25,7 +27,8 @@ This is - strictly speaking - not necessary, but required for the generated
 repository to be pulled into other projects via Composer. This step needs to be
 repeated whenever the Composer files change upstream.
 ``` bash
-# Copy the composer.json file, replacing 'core/' with ''
+# Copy the composer.json file, changing the package name from 'drupal/drupal' to
+# 'drupal/drupal-core' and replacing 'core/' with ''
 $ sed 's/core\///' <composer.json >core/composer.json
 $ cp composer.lock core/composer.lock
 $ git add core/composer.json core/composer.lock

@@ -1,0 +1,146 @@
+#! /bin/bash
+
+UPSTREAM_REPOSITORY=https://github.com/drupal/drupal
+UPSTREAM_DIRECTORY=upstream
+DOWNSTREAM_REPOSITORY=git@github.com:tstoeckler/drupal-core.git
+
+# Allow overriding the defaults
+if [ -r subtree-split.config ]
+then
+  source subtree-split.config
+fi
+
+help() {
+  echo "Maintains a Git subtree split of the Drupal 8 core directory.
+
+Commands:
+init			Initializes the Drupal core subsplit in the $UPSTREAM_DIRECTORY
+			directory
+update			Retrieves updates from the upstream repository
+push [branch|tag] ID	Pushes the Drupal core directory of a branch or tag
+			identified by ID as a subtree to the downstream repository
+help			Show this help text
+"
+}
+
+init() {
+  if [ -d $UPSTREAM_DIRECTORY ]
+  then
+    echo "The upstream repository is already initialized."
+    return
+  else
+    git clone $UPSTREAM_REPOSITORY $UPSTREAM_DIRECTORY
+  fi
+}
+
+update() {
+  if [ ! -d $UPSTREAM_DIRECTORY ]
+  then
+    echo "The upstream repository has not been initialized."
+    return
+  else
+    cd $UPSTREAM_DIRECTORY
+    git fetch
+    cd ..
+  fi
+}
+
+push_branch() {
+  if [ ! $1 ]
+  then
+    echo 'Specify the branch to push.'
+    return;
+  fi
+
+  cd $UPSTREAM_DIRECTORY
+
+  git checkout $1
+
+  # When deleting the branch below, we need to be on a different branch (or
+  # commit). Therefore we store the current commit hash, to check it out later.
+  COMMIT_HASH=`git show-ref --hash HEAD`
+
+  copy_composer_files
+
+  # `git subtree split` will return the commit ID of the generated subtree
+  SUBTREE_HASH=`git subtree split -P core`
+  git push --force $DOWNSTREAM_REPOSITORY $SUBTREE_HASH:$1
+
+  # Clean up so that the next push starts from a clean repository.
+  git checkout $COMMIT_HASH
+  git branch -D $1
+
+  cd ..
+}
+
+push_tag() {
+  if [ ! $1 ]
+  then
+    echo 'Specify the tag to push.'
+    return;
+  fi
+
+  cd $UPSTREAM_DIRECTORY
+
+  # Because we want to apply additional commits to a tag, we cannot checkout the
+  # tag directly.
+  git checkout `git show-ref --hash $1`
+
+  copy_composer_files
+
+  SUBTREE_HASH=`git subtree split -P core`
+
+  # Delete the tag so we can recreate it for the subtree.
+  git tag --delete $1
+  git tag $1 $SUBTREE_HASH
+  git push --force $DOWNSTREAM_REPOSITORY tag $1
+
+  # Clean up so that the next push starts from a clean repository.
+  git tag --delete $1
+
+  cd ..
+}
+
+copy_composer_files() {
+  # Copy the composer.json file, changing the package name from 'drupal/drupal' to
+  # 'drupal/drupal-core' and replacing 'core/' with ''
+  sed 's/drupal\/drupal/drupal\/drupal-core/' <composer.json | sed 's/core\///' >core/composer.json
+  cp composer.lock core/composer.lock
+  git add core/composer.json core/composer.lock
+  git commit -m "Copy the Composer files to the core directory."
+}
+
+# Perform the requested action.
+case "$1" in
+  init)
+    init
+    ;;
+
+  update)
+    update
+    ;;
+
+  push)
+    case "$2" in 
+      branch)
+        push_branch $3
+        ;;
+
+      tag)
+        push_tag $3
+        ;;
+
+      *)
+        echo "The first argument to push must be 'branch' or 'tag'."
+        exit;
+    esac;
+    ;;
+
+  help)
+    help
+    ;;
+
+  *)
+    help
+    ;;
+esac

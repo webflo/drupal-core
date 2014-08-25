@@ -3,60 +3,40 @@ Drupal /Core
 
 This is a [Git subtree] (https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) split of [Drupal] (https://github.com/drupal/drupal) 8's `core` directory.
 
-How?
+Usage
 ----
 
-#### 1. Initialize the Drupal Git repository
-Perform a split for the [8.0.x] (https://github.com/drupal/drupal/tree/8.0.x) branch:
+#### Initialize the repository
 ``` bash
-$ git clone https://github.com/drupal/drupal drupal-core --branch 8.0.x
-$ cd drupal-core
+# Clone the repository
+git clone https://github.com/tstoeckler/drupal-core.git
+cd drupal-core
+
+# Initialize the upstream repository
+./subtree-split init
 ```
 
-Perform a split for a tag, for example the [8.0.0-alpha14] (https://github.com/drupal/drupal/tree/8.0.0-alpha14) tag:
+#### Update the respository
 ``` bash
-$ git clone https://github.com/drupal/drupal drupal-core
-$ cd drupal-core
-# Because we want to apply additional commits to a tag (see below), we cannot
-# checkout the tag directly.
-$ git checkout `git show-ref --hash 8.0.0-alpha14`
+./subtree-split update
 ```
 
-#### 2. Copy the Composer files to the `core` directory
-This is - strictly speaking - not necessary, but required for the generated
-repository to be pulled into other projects via Composer. This step needs to be
-repeated whenever the Composer files change upstream.
-``` bash
-# Copy the composer.json file, changing the package name from 'drupal/drupal' to
-# 'drupal/drupal-core' and replacing 'core/' with ''
-$ sed 's/drupal\/drupal/drupal\/drupal-core/' <composer.json | sed 's/core\///' >core/composer.json
-$ cp composer.lock core/composer.lock
-$ git add core/composer.json core/composer.lock
-$ git commit -m "Copy the Composer files to the core directory."
-```
-
-#### 3. Update to the latest version of the remote repository
-``` bash
-$ git pull --rebase
-```
-
-#### 4. Create the split repository
-``` bash
-# `git subtree split` will return the commit ID of the generated subtree, so we
-# store that in an environment variable for use below.
-$ export SUBTREE_HASH=`git subtree split -P core`
-```
-
-#### 5. Publish the split repository
-Publish the subtree of the 8.0.x branch:
+#### Push the split repository
 ```bash
-$ git push git@github.com:tstoeckler/drupal-core.git $SUBTREE_HASH:8.0.x
+# Push the 8.0.x branch
+./subtree-push branch 8.0.x
+
+# Push the 8.0.0-alpha 14 tag
+./subtree-push tag 8.0.0-alpha14
 ```
 
-Publish the subtree of the 8.0.0-alpha14 tag:
+#### Configuration
+To use different upstream and downstream repositories or a different directory,
+place a `subtree-split.config` file in the root of this repository, that looks
+like the following:
 ```bash
-# Delete the tag so we can recreate it for the subtree.
-$ git tag --delete 8.0.0-alpha14
-$ git tag 8.0.0-alpha14 $SUBTREE_HASH
-$ git push git@github.com:tstoeckler/drupal-core.git tag 8.0.0-alpha14
+UPSTREAM_REPOSITORY=https://github.com/drupal/drupal
+UPSTREAM_DIRECTORY=upstream
+DOWNSTREAM_REPOSITORY=git@github.com:tstoeckler/drupal-core.git
 ```
+

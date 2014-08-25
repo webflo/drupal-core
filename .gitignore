@@ -1,0 +1,5 @@
+# Ignore the configuration file
+subtree-split.config
+
+# Ignore the upstream repository
+upstream

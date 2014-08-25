@@ -1,4 +1,4 @@
-Drupal /Core
+Drupal `/core`
 ============
 
 This is a [Git subtree] (https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) split of [Drupal] (https://github.com/drupal/drupal) 8's `core` directory.

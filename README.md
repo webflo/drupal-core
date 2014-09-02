@@ -39,6 +39,14 @@ Many Drupal 8 modules ship with a `composer.json` file so you can add a
 ```
 line to the `"installer-paths"` section so that you can pull in all modules which support this via Composer as well, and they will be placed into the `modules` directory where Drupal expects them to be. This works similarly for themes.
 
+In order to actually install Drupal you need to copy some files from the upstream Drupal repository into your repository root. The `index.php`, `sites/default/default.services.yml` and `sites/default/default.settings.php` files are required to operate Drupal and the `.htaccess` or `web.config` and the `robots.txt` files are recommended to copy as well. The `composer.json` file needs to be copied as well for [Drush] (https://github.com/drush-ops/drush) to work with your Drupal installation. Copy the rest of the files to your liking.
+
+You can copy the files by cloning the upstream Drupal repository and copying them manually or by fetching them directly via the command line. For example:
+``` bash
+# Copy index.php from the upstream Drupal repository
+wget https://raw.githubusercontent.com/drupal/drupal/8.0.x/index.php
+```
+
 How this repository is maintained
 ----
 

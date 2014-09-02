@@ -13,7 +13,7 @@ Add the following to your site's `composer.json`:
   "require": {
     "composer/installers": "dev-drupal-core",
     "drupal/drupal-core": "8.0.*"
-  }
+  },
   "repositories": {
     {
       "type": "vcs",
@@ -23,7 +23,7 @@ Add the following to your site's `composer.json`:
       "type": "vcs",
       "url": "https://github.com/tstoeckler/drupal-core"
     }
-  }
+  },
   "extra": {
     "installer-paths": {
       "core": ["type:drupal-core"]

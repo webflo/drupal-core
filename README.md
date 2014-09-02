@@ -10,13 +10,10 @@ Usage
 Add the following to your site's `composer.json`:
 ``` json
 {
-  ...
   "require": {
     "composer/installers": "dev-drupal-core",
-    "drupal/drupal-core": "8.0.*",
-    ...
+    "drupal/drupal-core": "8.0.*"
   }
-  ...
   "repositories": {
     {
       "type": "vcs",
@@ -25,18 +22,13 @@ Add the following to your site's `composer.json`:
     {
       "type": "vcs",
       "url": "https://github.com/tstoeckler/drupal-core"
-    },
-    ...
+    }
   }
-  ...
   "extra": {
     "installer-paths": {
-      "core": ["type:drupal-core"],
-      ...
-    },
-    ...
+      "core": ["type:drupal-core"]
+    }
   }
-  ...
 }
 ```
 This will download Drupal's `core` directory into the root of the repository. If you want your Drupal installation to be in a subdirectory of the repository simply replace `"core"` in the `"installer-paths"` section above with `"web/core"` or similar. Of course any other version declaration supported by Composer works as well, so you can also target a specific tag or commit of this repository.

@@ -27,13 +27,13 @@ Add the following to your site's `composer.json`:
         "type": "drupal-core",
         "version": "8.0.0-dev",
         "dist": {
-          "url": "https://github.com/dawehner/drupal-core/archive/ef2552708d53942d2528c00683ff0f3982769ff6.zip",
+          "url": "https://github.com/tstoeckler/drupal-core/archive/8.0.x.zip",
           "type": "zip"
         },
         "source": {
-          "url": "git@github.com:dawehner/drupal-core.git",
+          "url": "git@github.com:tstoeckler/drupal-core.git",
           "type": "git",
-          "reference": "ef2552708d53942d2528c00683ff0f3982769ff6"
+          "reference": "8.0.x"
         },
         "license": "GPL-2.0+",
         "require": {
@@ -80,7 +80,6 @@ Add the following to your site's `composer.json`:
   }
 }
 ```
-(Because Drupal's `composer.json` is in the repository root, not in the `core` directory, most of Drupal's `composer.json` needs to be duplicated unfortunately.)
 
 This will download Drupal's `core` directory into the root of the repository. If you want your Drupal installation to be in a subdirectory of the repository simply replace `"core"` in the `"installer-paths"` section above with `"web/core"` or similar. Of course any other version declaration supported by Composer works as well, so you can also target a specific tag or commit of this repository.
 
@@ -96,6 +95,29 @@ You can copy the files by cloning the upstream Drupal repository and copying the
 ``` bash
 # Copy index.php from the upstream Drupal repository
 wget https://raw.githubusercontent.com/drupal/drupal/8.0.x/index.php
+```
+
+#### Versions
+Because Drupal's `composer.json` is in the repository root, not in the `core` directory, most of Drupal's `composer.json` needs to be duplicated, unfortunately. For the same reason pulling in a different version of Drupal is more tedious than it should be. To use the [8.0.0-alpha14] (https://github.com/tstoeckler/drupal-core/releases/tag/8.0.0-alpha14) version of Drupal, for example, adapt the respective parts of your `composer.json` to look like the following:
+``` json
+{
+  "require": {
+    "drupal/drupal-core": "8.0.0-alpha14"
+  },
+  "repositories": [
+    {
+      "package": {
+        "version": "8.0.0-alpha14",
+        "dist": {
+          "url": "https://github.com/tstoeckler/drupal-core/archive/8.0.0-alpha14.zip",
+        },
+        "source": {
+          "reference": "tags/8.0.0-alpha14"
+        }
+      }
+    }
+  }
+}
 ```
 
 How this repository is maintained

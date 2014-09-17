@@ -20,8 +20,57 @@ Add the following to your site's `composer.json`:
       "url": "https://github.com/tstoeckler/installers"
     },
     {
-      "type": "vcs",
-      "url": "https://github.com/tstoeckler/drupal-core"
+      "type": "package",
+      "package": {
+        "name": "drupal/drupal-core",
+        "description": "Drupal is an open source content management platform powering millions of websites and applications.",
+        "type": "drupal-core",
+        "version": "8.0.0-dev",
+        "dist": {
+          "url": "https://github.com/dawehner/drupal-core/archive/ef2552708d53942d2528c00683ff0f3982769ff6.zip",
+          "type": "zip"
+        },
+        "source": {
+          "url": "git@github.com:dawehner/drupal-core.git",
+          "type": "git",
+          "reference": "ef2552708d53942d2528c00683ff0f3982769ff6"
+        },
+        "license": "GPL-2.0+",
+        "require": {
+          "php": ">=5.4.2",
+          "sdboyer/gliph": "0.1.*",
+          "symfony/class-loader": "2.4.*",
+          "symfony/css-selector": "2.4.*",
+          "symfony/dependency-injection": "2.4.*",
+          "symfony/event-dispatcher": "2.4.*",
+          "symfony/http-foundation": "2.4.*",
+          "symfony/http-kernel": "2.4.*",
+          "symfony/routing": "2.4.*",
+          "symfony/serializer": "2.5.*",
+          "symfony/validator": "2.4.*",
+          "symfony/yaml": "dev-master#e49a47d60348665261f6e279ba383241deb73cab",
+          "twig/twig": "1.15.*",
+          "doctrine/common": "dev-master#a45d110f71c323e29f41eb0696fa230e3fa1b1b5",
+          "doctrine/annotations": "dev-master#463d926a8dcc49271cb7db5a08364a70ed6e3cd3",
+          "guzzlehttp/guzzle": "4.1.*",
+          "kriswallsmith/assetic": "1.1.*@alpha",
+          "symfony-cmf/routing": "1.2.*",
+          "easyrdf/easyrdf": "0.8.*",
+          "phpunit/phpunit": "4.1.*",
+          "phpunit/phpunit-mock-objects": "dev-master#e60bb929c50ae4237aaf680a4f6773f4ee17f0a2",
+          "zendframework/zend-feed": "2.2.*",
+          "mikey179/vfsStream": "1.*"
+        },
+        "autoload": {
+          "psr-4": {
+            "Drupal\\Core\\": "lib/Drupal/Core",
+            "Drupal\\Component\\": "lib/Drupal/Component"
+          },
+          "files": [
+            "lib/Drupal.php"
+          ]
+        }
+      }
     }
   ],
   "extra": {
@@ -31,6 +80,8 @@ Add the following to your site's `composer.json`:
   }
 }
 ```
+(Because Drupal's `composer.json` is in the repository root, not in the `core` directory, most of Drupal's `composer.json` needs to be duplicated unfortunately.)
+
 This will download Drupal's `core` directory into the root of the repository. If you want your Drupal installation to be in a subdirectory of the repository simply replace `"core"` in the `"installer-paths"` section above with `"web/core"` or similar. Of course any other version declaration supported by Composer works as well, so you can also target a specific tag or commit of this repository.
 
 Many Drupal 8 modules ship with a `composer.json` file so you can add a 

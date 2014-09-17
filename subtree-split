@@ -60,11 +60,9 @@ push_branch() {
   # commit). Therefore we store the current commit hash, to check it out later.
   COMMIT_HASH=`git show-ref --hash HEAD`
 
-  copy_composer_files
-
   # `git subtree split` will return the commit ID of the generated subtree
   SUBTREE_HASH=`git subtree split -P core`
-  git push --force $DOWNSTREAM_REPOSITORY $SUBTREE_HASH:$1
+  git push $DOWNSTREAM_REPOSITORY $SUBTREE_HASH:$1
 
   # Clean up so that the next push starts from a clean repository.
   git checkout $COMMIT_HASH
@@ -86,28 +84,17 @@ push_tag() {
   # tag directly.
   git checkout `git show-ref --hash $1`
 
-  copy_composer_files
-
   SUBTREE_HASH=`git subtree split -P core`
 
   # Delete the tag so we can recreate it for the subtree.
   git tag --delete $1
   git tag $1 $SUBTREE_HASH
-  git push --force $DOWNSTREAM_REPOSITORY tag $1
+  git push $DOWNSTREAM_REPOSITORY tag $1
 
   # Clean up so that the next push starts from a clean repository.
   git tag --delete $1
 
   cd ..
-}
-
-copy_composer_files() {
-  # Copy the composer.json file, changing the package name from 'drupal/drupal' to
-  # 'drupal/drupal-core' and replacing 'core/' with ''
-  sed 's/drupal\/drupal/drupal\/drupal-core/' <composer.json | sed 's/core\///' >core/composer.json
-  cp composer.lock core/composer.lock
-  git add core/composer.json core/composer.lock
-  git commit -m "Copy the Composer files to the core directory."
 }
 
 # Perform the requested action.

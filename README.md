@@ -83,11 +83,26 @@ Add the following to your site's `composer.json`:
 
 This will download Drupal's `core` directory into the root of the repository. If you want your Drupal installation to be in a subdirectory of the repository simply replace `"core"` in the `"installer-paths"` section above with `"web/core"` or similar. Of course any other version declaration supported by Composer works as well, so you can also target a specific tag or commit of this repository.
 
-Many Drupal 8 modules ship with a `composer.json` file so you can add a 
+Many Drupal 8 modules ship with a `composer.json` file so you can add the following to your `composer.json` so that you can pull in all modules which support this via Composer as well, and they will be placed into the `modules` directory where Drupal expects them to be:
 ``` json
-"modules": ["type:drupal-module"]
+{
+  "extra": {
+    "installer-paths": {
+      "modules": ["type:drupal-module"]
+    }
+  }
+}
 ```
-line to the `"installer-paths"` section so that you can pull in all modules which support this via Composer as well, and they will be placed into the `modules` directory where Drupal expects them to be. This works similarly for themes.
+This works similarly for themes:
+``` json
+{
+  "extra": {
+    "installer-paths": {
+      "themes": ["type:drupal-theme"]
+    }
+  }
+}
+```
 
 In order to actually install Drupal you need to copy some files from the upstream Drupal repository into your repository root. The `index.php`, `sites/default/default.services.yml` and `sites/default/default.settings.php` files are required to operate Drupal and the `.htaccess` or `web.config` and the `robots.txt` files are recommended to copy as well. The `composer.json` file needs to be copied as well for [Drush] (https://github.com/drush-ops/drush) to work with your Drupal installation. Copy the rest of the files to your liking.
 
@@ -116,7 +131,7 @@ Because Drupal's `composer.json` is in the repository root, not in the `core` di
         }
       }
     }
-  }
+  ]
 }
 ```
 

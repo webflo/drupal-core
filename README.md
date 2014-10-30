@@ -171,4 +171,4 @@ UPSTREAM_REPOSITORY=https://github.com/drupal/drupal
 UPSTREAM_DIRECTORY=upstream
 DOWNSTREAM_REPOSITORY=git@github.com:tstoeckler/drupal-core.git
 ```
-
+By default the `DOWNSTREAM_REPOSITORY` variable is taken from the `remote.origin.url` Git configuration value so that it does not need to be changed when cloning this repository.

@@ -39,32 +39,34 @@ Add the following to your site's `composer.json`:
         "require": {
           "php": ">=5.4.2",
           "sdboyer/gliph": "0.1.*",
-          "symfony/class-loader": "2.4.*",
-          "symfony/css-selector": "2.4.*",
-          "symfony/dependency-injection": "2.4.*",
-          "symfony/event-dispatcher": "2.4.*",
-          "symfony/http-foundation": "2.4.*",
-          "symfony/http-kernel": "2.4.*",
-          "symfony/routing": "2.4.*",
+          "symfony/class-loader": "2.5.*",
+          "symfony/css-selector": "2.5.*",
+          "symfony/dependency-injection": "2.5.*",
+          "symfony/event-dispatcher": "2.5.*",
+          "symfony/http-foundation": "2.5.*",
+          "symfony/http-kernel": "2.5.*",
+          "symfony/routing": "2.5.*",
           "symfony/serializer": "2.5.*",
-          "symfony/validator": "2.4.*",
-          "symfony/yaml": "dev-master#e49a47d60348665261f6e279ba383241deb73cab",
-          "twig/twig": "1.15.*",
+          "symfony/validator": "2.5.*",
+          "symfony/yaml": "dev-master#499f7d7aa96747ad97940089bd7a1fb24ad8182a",
+          "twig/twig": "1.16.*",
           "doctrine/common": "dev-master#a45d110f71c323e29f41eb0696fa230e3fa1b1b5",
-          "doctrine/annotations": "dev-master#463d926a8dcc49271cb7db5a08364a70ed6e3cd3",
-          "guzzlehttp/guzzle": "4.1.*",
-          "kriswallsmith/assetic": "1.1.*@alpha",
-          "symfony-cmf/routing": "1.2.*",
+          "doctrine/annotations": "1.2.*",
+          "guzzlehttp/guzzle": "~5.0",
+          "symfony-cmf/routing": "1.3.*",
           "easyrdf/easyrdf": "0.8.*",
           "phpunit/phpunit": "4.1.*",
           "phpunit/phpunit-mock-objects": "dev-master#e60bb929c50ae4237aaf680a4f6773f4ee17f0a2",
           "zendframework/zend-feed": "2.2.*",
-          "mikey179/vfsStream": "1.*"
+          "mikey179/vfsStream": "1.*",
+          "stack/builder": "1.0.*",
+          "egulias/email-validator": "1.2.*"
         },
         "autoload": {
           "psr-4": {
             "Drupal\\Core\\": "lib/Drupal/Core",
-            "Drupal\\Component\\": "lib/Drupal/Component"
+            "Drupal\\Component\\": "lib/Drupal/Component",
+            "Drupal\\Driver\\": "../drivers/lib/Drupal/Driver"
           },
           "files": [
             "lib/Drupal.php"
@@ -113,21 +115,21 @@ wget https://raw.githubusercontent.com/drupal/drupal/8.0.x/index.php
 ```
 
 #### Versions
-Because Drupal's `composer.json` is in the repository root, not in the `core` directory, most of Drupal's `composer.json` needs to be duplicated, unfortunately. For the same reason pulling in a different version of Drupal is more tedious than it should be. To use the [8.0.0-alpha14] (https://github.com/tstoeckler/drupal-core/releases/tag/8.0.0-alpha14) version of Drupal, for example, adapt the respective parts of your `composer.json` to look like the following:
+Because Drupal's `composer.json` is in the repository root, not in the `core` directory, most of Drupal's `composer.json` needs to be duplicated, unfortunately. For the same reason pulling in a different version of Drupal is more tedious than it should be. To use the [8.0.0-beta2] (https://github.com/tstoeckler/drupal-core/releases/tag/8.0.0-beta2) version of Drupal, for example, adapt the respective parts of your `composer.json` to look like the following:
 ``` json
 {
   "require": {
-    "drupal/drupal-core": "8.0.0-alpha14"
+    "drupal/drupal-core": "8.0.0-beta2"
   },
   "repositories": [
     {
       "package": {
-        "version": "8.0.0-alpha14",
+        "version": "8.0.0-beta2",
         "dist": {
-          "url": "https://github.com/tstoeckler/drupal-core/archive/8.0.0-alpha14.zip",
+          "url": "https://github.com/tstoeckler/drupal-core/archive/8.0.0-beta2.zip",
         },
         "source": {
-          "reference": "tags/8.0.0-alpha14"
+          "reference": "tags/8.0.0-beta2"
         }
       }
     }
@@ -158,8 +160,8 @@ cd drupal-core
 # Push the 8.0.x branch
 ./subtree-push branch 8.0.x
 
-# Push the 8.0.0-alpha 14 tag
-./subtree-push tag 8.0.0-alpha14
+# Push the 8.0.0-beta2 tag
+./subtree-push tag 8.0.0-beta2
 ```
 
 #### Configuration

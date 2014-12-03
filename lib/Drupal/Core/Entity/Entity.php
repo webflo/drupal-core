@@ -499,7 +499,7 @@ abstract class Entity implements EntityInterface {
    */
   protected function onUpdateBundleEntity() {
     $bundle_of = $this->getEntityType()->getBundleOf();
-    if ($bundle_of !== FALSE) {
+    if (isset($bundle_of)) {
       // If this entity is a bundle entity type of another entity type, and we're
       // updating an existing entity, and that other entity type has a view
       // builder class, then invalidate the render cache of entities for which

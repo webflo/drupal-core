@@ -158,10 +158,10 @@ cd drupal-core
 #### Push the split repository
 ```bash
 # Push the 8.0.x branch
-./subtree-push branch 8.0.x
+./subtree-split push branch 8.0.x
 
 # Push the 8.0.0-beta2 tag
-./subtree-push tag 8.0.0-beta2
+./subtree-split push tag 8.0.0-beta2
 ```
 
 #### Configuration

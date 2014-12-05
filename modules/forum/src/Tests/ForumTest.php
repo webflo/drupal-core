@@ -121,9 +121,7 @@ class ForumTest extends WebTestBase {
     $this->drupalLogin($this->web_user);
     // Verify that this user is shown a message that they may not post content.
     $this->drupalGet('forum/' . $this->forum['tid']);
-    // @todo Restore test coverage in https://www.drupal.org/node/1853072.
-    //$this->assertText(t('You are not allowed to post new content in the forum'), "Authenticated user without permission to post forum content is shown message in local tasks to that effect.");
-
+    $this->assertText(t('You are not allowed to post new content in the forum'), "Authenticated user without permission to post forum content is shown message in local tasks to that effect.");
 
     // Log in, and do basic tests for a user with permission to edit any forum
     // content.
@@ -203,6 +201,11 @@ class ForumTest extends WebTestBase {
     $vocabulary->save();
     $this->drupalGet('forum');
     $this->assertTitle(t('Discussions | Drupal'));
+
+    // Test anonymous action link.
+    $this->drupalLogout();
+    $this->drupalGet('forum/' . $this->forum['tid']);
+    $this->assertLink(t('Log in to post new content in the forum.'));
   }
 
   /**
@@ -230,7 +233,7 @@ class ForumTest extends WebTestBase {
     $this->assertEqual(0, $nid_count, 'A forum node was not created when missing a forum vocabulary.');
 
     // Reset the defaults for future tests.
-    \Drupal::moduleHandler()->install(array('forum'));
+    \Drupal::service('module_installer')->install(array('forum'));
   }
 
   /**

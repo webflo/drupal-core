@@ -12,16 +12,38 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests the Field UI "Manage fields" screen.
  *
  * @group field_ui
  */
-class ManageFieldsTest extends FieldUiTestBase {
+class ManageFieldsTest extends WebTestBase {
 
+  use FieldUiTestTrait;
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('node', 'field_ui', 'field_test', 'taxonomy', 'image');
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
+
+    // Create a test user.
+    $admin_user = $this->drupalCreateUser(array('access content', 'administer content types', 'administer node fields', 'administer node form display', 'administer node display', 'administer taxonomy', 'administer taxonomy_term fields', 'administer taxonomy_term display', 'administer users', 'administer account settings', 'administer user display', 'bypass node access'));
+    $this->drupalLogin($admin_user);
+
+    // Create content type, with underscores.
+    $type_name = strtolower($this->randomMachineName(8)) . '_test';
+    $type = $this->drupalCreateContentType(array('name' => $type_name, 'type' => $type_name));
+    $this->type = $type->type;
 
     // Create random field name.
     $this->field_label = $this->randomMachineName(8);
@@ -72,6 +94,7 @@ class ManageFieldsTest extends FieldUiTestBase {
     $this->cardinalitySettings();
     $this->fieldListAdminPage();
     $this->deleteField();
+    $this->addPersistentFieldStorage();
   }
 
   /**
@@ -117,11 +140,7 @@ class ManageFieldsTest extends FieldUiTestBase {
    */
   function createField() {
     // Create a test field.
-    $edit = array(
-      'fields[_add_new_field][label]' => $this->field_label,
-      'fields[_add_new_field][field_name]' => $this->field_name_input,
-    );
-    $this->fieldUIAddNewField('admin/structure/types/manage/' . $this->type, $edit);
+    $this->fieldUIAddNewField('admin/structure/types/manage/' . $this->type, $this->field_name_input, $this->field_label);
   }
 
   /**
@@ -167,11 +186,7 @@ class ManageFieldsTest extends FieldUiTestBase {
     $this->assertFalse($this->xpath('//select[@id="edit-add-existing-field-field-name"]//option[@value="comment"]'), 'The list of options respects entity type restrictions.');
 
     // Add a new field based on an existing field.
-    $edit = array(
-      'fields[_add_existing_field][label]' => $this->field_label . '_2',
-      'fields[_add_existing_field][field_name]' => $this->field_name,
-    );
-    $this->fieldUIAddExistingField("admin/structure/types/manage/page", $edit);
+    $this->fieldUIAddExistingField("admin/structure/types/manage/page", $this->field_name, $this->field_label . '_2');
   }
 
   /**
@@ -226,6 +241,26 @@ class ManageFieldsTest extends FieldUiTestBase {
   }
 
   /**
+   * Tests that persistent field storage appears in the field UI.
+   */
+  protected function addPersistentFieldStorage() {
+    $field_storage = FieldStorageConfig::loadByName('node', $this->field_name);
+    // Persist the field storage even if there are no fields.
+    $field_storage->set('persist_with_no_fields', TRUE)->save();
+    // Delete all instances of the field.
+    foreach ($field_storage->getBundles() as $node_type) {
+      // Delete all the body field instances.
+      $this->drupalPostForm('admin/structure/types/manage/' . $node_type . '/fields/node.' . $node_type . '.' . $this->field_name, array(), t('Delete field'));
+      $this->drupalPostForm(NULL, array(), t('Delete'));
+    }
+    // Check "Re-use existing field" appears.
+    $this->drupalGet('admin/structure/types/manage/page/fields');
+    $this->assertRaw(t('Re-use existing field'), '"Re-use existing field" was found.');
+    // Add a new field for the orphaned storage.
+    $this->fieldUIAddExistingField("admin/structure/types/manage/page", $this->field_name);
+  }
+
+  /**
    * Asserts field settings are as expected.
    *
    * @param $bundle
@@ -268,11 +303,7 @@ class ManageFieldsTest extends FieldUiTestBase {
     $this->assertText('New field name cannot be longer than 22 characters but is currently 23 characters long.');
 
     // Create a valid field.
-    $edit = array(
-      'fields[_add_new_field][label]' => $this->field_label,
-      'fields[_add_new_field][field_name]' => $this->field_name_input,
-    );
-    $this->fieldUIAddNewField('admin/structure/types/manage/' . $this->type, $edit);
+    $this->fieldUIAddNewField('admin/structure/types/manage/' . $this->type, $this->field_name_input, $this->field_label);
     $this->drupalGet('admin/structure/types/manage/' . $this->type . '/fields/node.' . $this->type . '.' . $field_prefix . $this->field_name_input);
     $this->assertText(format_string('@label settings for @type', array('@label' => $this->field_label, '@type' => $this->type)));
   }
@@ -341,11 +372,7 @@ class ManageFieldsTest extends FieldUiTestBase {
   function testDeleteField() {
     // Create a new field.
     $bundle_path1 = 'admin/structure/types/manage/' . $this->type;
-    $edit1 = array(
-      'fields[_add_new_field][label]' => $this->field_label,
-      'fields[_add_new_field][field_name]' => $this->field_name_input,
-    );
-    $this->fieldUIAddNewField($bundle_path1, $edit1);
+    $this->fieldUIAddNewField($bundle_path1, $this->field_name_input, $this->field_label);
 
     // Create an additional node type.
     $type_name2 = strtolower($this->randomMachineName(8)) . '_test';
@@ -354,11 +381,7 @@ class ManageFieldsTest extends FieldUiTestBase {
 
     // Add a field to the second node type.
     $bundle_path2 = 'admin/structure/types/manage/' . $type_name2;
-    $edit2 = array(
-      'fields[_add_existing_field][label]' => $this->field_label,
-      'fields[_add_existing_field][field_name]' => $this->field_name,
-    );
-    $this->fieldUIAddExistingField($bundle_path2, $edit2);
+    $this->fieldUIAddExistingField($bundle_path2, $this->field_name, $this->field_label);
 
     // Delete the first field.
     $this->fieldUIDeleteField($bundle_path1, "node.$this->type.$this->field_name", $this->field_label, $this->type);
@@ -467,7 +490,7 @@ class ManageFieldsTest extends FieldUiTestBase {
     entity_get_form_display('node', $this->type, 'default')
       ->setComponent($field_name)
       ->save();
-    $this->assertTrue(entity_load('field_config', 'node.' . $this->type . '.' . $field_name), format_string('A field of the field storage %field was created programmatically.', array('%field' => $field_name)));
+    $this->assertTrue(FieldConfig::load('node.' . $this->type . '.' . $field_name), format_string('A field of the field storage %field was created programmatically.', array('%field' => $field_name)));
 
     // Check that the newly added field appears on the 'Manage Fields'
     // screen.
@@ -529,11 +552,8 @@ class ManageFieldsTest extends FieldUiTestBase {
   function testDeleteTaxonomyField() {
     // Create a new field.
     $bundle_path = 'admin/structure/taxonomy/manage/tags/overview';
-    $edit1 = array(
-      'fields[_add_new_field][label]' => $this->field_label,
-      'fields[_add_new_field][field_name]' => $this->field_name_input,
-    );
-    $this->fieldUIAddNewField($bundle_path, $edit1);
+
+    $this->fieldUIAddNewField($bundle_path, $this->field_name_input, $this->field_label);
 
     // Delete the field.
     $this->fieldUIDeleteField($bundle_path, "taxonomy_term.tags.$this->field_name", $this->field_label, 'Tags');

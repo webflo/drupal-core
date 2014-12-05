@@ -275,6 +275,7 @@ abstract class WebTestBase extends TestBase {
     );
     $type = entity_create('node_type', $values);
     $status = $type->save();
+    node_add_body_field($type);
     \Drupal::service('router.builder')->rebuild();
 
     $this->assertEqual($status, SAVED_NEW, String::format('Created content type %type.', array('%type' => $type->id())));
@@ -381,13 +382,14 @@ abstract class WebTestBase extends TestBase {
         'max_age' => 0,
       ),
     );
-    foreach (array('region', 'id', 'theme', 'plugin', 'weight') as $key) {
+    $values = [];
+    foreach (array('region', 'id', 'theme', 'plugin', 'weight', 'visibility') as $key) {
       $values[$key] = $settings[$key];
       // Remove extra values that do not belong in the settings array.
       unset($settings[$key]);
     }
-    foreach ($settings['visibility'] as $id => $visibility) {
-      $settings['visibility'][$id]['id'] = $id;
+    foreach ($values['visibility'] as $id => $visibility) {
+      $values['visibility'][$id]['id'] = $id;
     }
     $values['settings'] = $settings;
     $block = entity_create('block', $values);
@@ -821,19 +823,29 @@ abstract class WebTestBase extends TestBase {
       // Copy the testing-specific service overrides in place.
       copy($settings_services_file, $directory . '/services.yml');
     }
-
+    if ($this->strictConfigSchema) {
+      // Add a listener to validate configuration schema on save.
+      $yaml = new \Symfony\Component\Yaml\Yaml();
+      $services = $yaml->parse($directory . '/services.yml');
+      $services['services']['simpletest.config_schema_checker'] = [
+        'class' => 'Drupal\Core\Config\Testing\ConfigSchemaChecker',
+        'arguments' => ['@config.typed'],
+        'tags' => [['name' => 'event_subscriber']]
+      ];
+      file_put_contents($directory . '/services.yml', $yaml->dump($services));
+    }
     // Since Drupal is bootstrapped already, install_begin_request() will not
     // bootstrap into DRUPAL_BOOTSTRAP_CONFIGURATION (again). Hence, we have to
     // reload the newly written custom settings.php manually.
     $class_loader = require DRUPAL_ROOT . '/core/vendor/autoload.php';
-    Settings::initialize($directory, $class_loader);
+    Settings::initialize(DRUPAL_ROOT, $directory, $class_loader);
 
     // Execute the non-interactive installer.
     require_once DRUPAL_ROOT . '/core/includes/install.core.inc';
     install_drupal($parameters);
 
     // Import new settings.php written by the installer.
-    Settings::initialize($directory, $class_loader);
+    Settings::initialize(DRUPAL_ROOT, $directory, $class_loader);
     foreach ($GLOBALS['config_directories'] as $type => $path) {
       $this->configDirectories[$type] = $path;
     }
@@ -901,7 +913,7 @@ abstract class WebTestBase extends TestBase {
     }
     if ($modules) {
       $modules = array_unique($modules);
-      $success = $container->get('module_handler')->install($modules, TRUE);
+      $success = $container->get('module_installer')->install($modules, TRUE);
       $this->assertTrue($success, String::format('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
       $this->rebuildContainer();
     }
@@ -920,12 +932,6 @@ abstract class WebTestBase extends TestBase {
     //   DrupalKernel::prepareLegacyRequest() -> DrupalKernel::boot() but that
     //   appears to be calling a different container.
     $this->container->get('stream_wrapper_manager')->register();
-    // Temporary fix so that when running from run-tests.sh we don't get an
-    // empty current path which would indicate we're on the home page.
-    $path = current_path();
-    if (empty($path)) {
-      _current_path('run-tests');
-    }
   }
 
   /**
@@ -1838,7 +1844,7 @@ abstract class WebTestBase extends TestBase {
       }
       switch ($command['command']) {
         case 'settings':
-          $drupal_settings = drupal_merge_js_settings(array($drupal_settings, $command['settings']));
+          $drupal_settings = NestedArray::mergeDeepArray([$drupal_settings, $command['settings']], TRUE);
           break;
 
         case 'insert':

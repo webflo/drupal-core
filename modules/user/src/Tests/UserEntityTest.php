@@ -8,7 +8,7 @@
 namespace Drupal\user\Tests;
 
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\simpletest\DrupalUnitTestBase;
+use Drupal\simpletest\KernelTestBase;
 use Drupal\user\Entity\User;
 
 /**
@@ -17,14 +17,14 @@ use Drupal\user\Entity\User;
  * @group user
  * @see \Drupal\user\Entity\User
  */
-class UserEntityTest extends DrupalUnitTestBase {
+class UserEntityTest extends KernelTestBase {
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('system', 'user', 'field', 'entity');
+  public static $modules = array('system', 'user', 'field');
 
   /**
    * Tests some of the methods.

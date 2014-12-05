@@ -7,6 +7,8 @@
 
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
+use Drupal\Component\Utility\Random;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
@@ -20,7 +22,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  *   default_formatter = "string",
  * )
  */
-class StringLongItem extends StringItem {
+class StringLongItem extends StringItemBase {
 
   /**
    * {@inheritdoc}
@@ -34,6 +36,15 @@ class StringLongItem extends StringItem {
         ),
       ),
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
+    $random = new Random();
+    $values['value'] = $random->paragraphs();
+    return $values;
   }
 
 }

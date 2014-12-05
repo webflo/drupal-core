@@ -28,6 +28,11 @@ function template_preprocess_views_view(&$variables) {
   $variables['css_name'] = Html::cleanCssIdentifier($id);
   $variables['id'] = $id;
   $variables['display_id'] = $view->current_display;
+  // Override the title to be empty by default. For example, if viewing a page
+  // view, 'title' will already be populated in $variables. This can still be
+  // overridden to use a title when needed. See views_ui_preprocess_views_view()
+  // for an example of this.
+  $variables['title'] = '';
 
   // Basic classes.
   $variables['attributes']['class'] = array();
@@ -301,10 +306,12 @@ function template_preprocess_views_view_summary(&$variables) {
   $active_urls = array(
     // Force system path.
     \Drupal::url('<current>', [], ['alias' => TRUE]),
-    _url(current_path(), array('alias' => TRUE)), // force system path
+    // Force system path.
+    Url::fromRouteMatch(\Drupal::routeMatch())->setOption('alias', TRUE)->toString(),
     // Could be an alias.
     \Drupal::url('<current>'),
-    _url(current_path()), // could be an alias
+    // Could be an alias.
+    Url::fromRouteMatch(\Drupal::routeMatch())->toString(),
   );
   $active_urls = array_combine($active_urls, $active_urls);
 

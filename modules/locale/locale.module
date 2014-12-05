@@ -180,11 +180,6 @@ function locale_help($route_name, RouteMatchInterface $route_match) {
  */
 function locale_theme() {
   return array(
-    'locale_translate_edit_form_strings' => array(
-      'render element' => 'form',
-      'file' => 'locale.pages.inc',
-      'function' => 'theme_locale_translate_edit_form_strings',
-    ),
     'locale_translation_last_check' => array(
       'variables' => array('last' => NULL),
       'file' => 'locale.pages.inc',
@@ -321,10 +316,10 @@ function locale_modules_installed($modules) {
 }
 
 /**
- * Implements hook_modules_uninstalled().
+ * Implements hook_module_preuninstall().
  */
-function locale_modules_uninstalled($modules) {
-  $components['module'] = $modules;
+function locale_module_preuninstall($module) {
+  $components['module'] = array($module);
   locale_system_remove($components);
 }
 
@@ -540,13 +535,9 @@ function locale_library_alter(array &$library, $name) {
     $library['dependencies'][] = 'locale/drupal.locale.datepicker';
 
     $language_interface = \Drupal::languageManager()->getCurrentLanguage();
-    $settings['jquery']['ui']['datepicker'] = array(
+    $library['drupalSettings']['jquery']['ui']['datepicker'] = array(
       'isRTL' => $language_interface->getDirection() == LanguageInterface::DIRECTION_RTL,
       'firstDay' => \Drupal::config('system.date')->get('first_day'),
-    );
-    $library['js'][] = array(
-      'type' => 'setting',
-      'data' => $settings,
     );
   }
 }

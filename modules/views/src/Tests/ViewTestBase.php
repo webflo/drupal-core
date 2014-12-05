@@ -24,6 +24,15 @@ use Drupal\views\ViewExecutable;
 abstract class ViewTestBase extends WebTestBase {
 
   /**
+   * Set to TRUE to strict check all configuration saved.
+   *
+   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
+   *
+   * @var bool
+   */
+  protected $strictConfigSchema = TRUE;
+
+  /**
    * Modules to enable.
    *
    * @var array
@@ -53,7 +62,7 @@ abstract class ViewTestBase extends WebTestBase {
     \Drupal::state()->set('views_test_data_schema', $this->schemaDefinition());
     \Drupal::state()->set('views_test_data_views_data', $this->viewsData());
 
-    \Drupal::moduleHandler()->install(array('views_test_data'));
+    \Drupal::service('module_installer')->install(array('views_test_data'));
     $this->resetAll();
     $this->rebuildContainer();
     $this->container->get('module_handler')->reload();

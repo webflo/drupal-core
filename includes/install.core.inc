@@ -14,7 +14,6 @@ use Drupal\Core\Installer\Exception\NoProfilesException;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageManager;
-use Drupal\Core\Page\DefaultHtmlPageRenderer;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\Translator\FileTranslation;
 use Drupal\Core\Extension\ExtensionDiscovery;
@@ -288,7 +287,7 @@ function install_begin_request(&$install_state) {
 
   $site_path = DrupalKernel::findSitePath($request, FALSE);
   $class_loader = require __DIR__ . '/../vendor/autoload.php';
-  Settings::initialize($site_path, $class_loader);
+  Settings::initialize(dirname(dirname(__DIR__)), $site_path, $class_loader);
 
   // Ensure that procedural dependencies are loaded as early as possible,
   // since the error/exception handlers depend on them.
@@ -334,7 +333,7 @@ function install_begin_request(&$install_state) {
   \Drupal::setContainer($container);
 
   // Determine whether base system services are ready to operate.
-  $install_state['config_verified'] = install_verify_config_directory(CONFIG_ACTIVE_DIRECTORY) && install_verify_config_directory(CONFIG_STAGING_DIRECTORY);
+  $install_state['config_verified'] = install_ensure_config_directory(CONFIG_ACTIVE_DIRECTORY) && install_ensure_config_directory(CONFIG_STAGING_DIRECTORY);
   $install_state['database_verified'] = install_verify_database_settings();
   $install_state['settings_verified'] = $install_state['config_verified'] && $install_state['database_verified'];
 
@@ -390,7 +389,7 @@ function install_begin_request(&$install_state) {
   }
 
   // Add list of all available profiles to the installation state.
-  $listing = new ExtensionDiscovery();
+  $listing = new ExtensionDiscovery($container->get('app.root'));
   $listing->setProfileDirectories(array());
   $install_state['profiles'] += $listing->scan('profile');
 
@@ -486,6 +485,11 @@ function install_run_tasks(&$install_state) {
     $install_state['active_task'] = $task_name;
     $original_parameters = $install_state['parameters'];
     $output = install_run_task($task, $install_state);
+    // Ensure the maintenance theme is initialized. If the install task has
+    // rebuilt the container the active theme will not be set. This can occur if
+    // the task has installed a module.
+    drupal_maintenance_theme();
+
     $install_state['parameters_changed'] = ($install_state['parameters'] != $original_parameters);
     // Store this task as having been performed during the current request,
     // and save it to the database as completed, if we need to and if the
@@ -718,7 +722,7 @@ function install_tasks($install_state) {
     $profile = $install_state['parameters']['profile'];
     $profile_install_file = $install_state['profiles'][$profile]->getPath() . '/' . $profile . '.install';
     if (file_exists($profile_install_file)) {
-      include_once DRUPAL_ROOT . '/' . $profile_install_file;
+      include_once \Drupal::root() . '/' . $profile_install_file;
     }
     $function = $install_state['parameters']['profile'] . '_install_tasks';
     if (function_exists($function)) {
@@ -934,7 +938,7 @@ function install_display_output($output, $install_state) {
     'ETag' => '"' . REQUEST_TIME . '"',
   );
   $response->headers->add($default_headers);
-  $response->setContent(DefaultHtmlPageRenderer::renderPage($output, $output['#title'], 'install', $regions));
+  $response->setContent(\Drupal::service('bare_html_page_renderer')->renderBarePage($output, $output['#title'], 'install_page', $regions));
   $response->send();
   exit;
 }
@@ -979,7 +983,7 @@ function install_base_system(&$install_state) {
 
   // Enable the user module so that sessions can be recorded during the
   // upcoming bootstrap step.
-  \Drupal::moduleHandler()->install(array('user'), FALSE);
+  \Drupal::service('module_installer')->install(array('user'), FALSE);
 
   // Save the list of other modules to install for the upcoming tasks.
   // State can be set to the database now that system.module is installed.
@@ -1112,6 +1116,7 @@ function install_select_profile(&$install_state) {
  * 3. A discovered profile that is a distribution.
  *    If multiple profiles are distributions, then the first discovered profile
  *    will be selected.
+ * 4. Only one visible profile is available.
  *
  * @param array $install_state
  *   The current installer state, containing a 'profiles' key, which is an
@@ -1138,6 +1143,16 @@ function _install_select_profile(&$install_state) {
     if (!empty($profile_info['distribution'])) {
       return $profile->getName();
     }
+  }
+
+  // Get all visible (not hidden) profiles.
+  $visible_profiles = array_filter($install_state['profiles'], function ($profile) {
+    $profile_info = install_profile_info($profile->getName());
+    return !isset($profile_info['hidden']) || !$profile_info['hidden'];
+  });
+
+  if (count($visible_profiles) == 1) {
+    return (key($visible_profiles));
   }
 }
 
@@ -1798,7 +1813,7 @@ function _install_module_batch($module, $module_name, &$context) {
   // loaded by drupal_bootstrap in subsequent batch requests, and other
   // modules possibly depending on it can safely perform their installation
   // steps.
-  \Drupal::moduleHandler()->install(array($module), FALSE);
+  \Drupal::service('module_installer')->install(array($module), FALSE);
   $context['results'][] = $module;
   $context['message'] = t('Installed %module module.', array('%module' => $module_name));
 }

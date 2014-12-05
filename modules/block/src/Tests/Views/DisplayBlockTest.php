@@ -23,7 +23,16 @@ use Drupal\Core\Template\Attribute;
 class DisplayBlockTest extends ViewTestBase {
 
   /**
-   * Modules to enable.
+   * Set to TRUE to strict check all configuration saved.
+   *
+   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
+   *
+   * @var bool
+   */
+  protected $strictConfigSchema = TRUE;
+
+  /**
+   * Modules to install.
    *
    * @var array
    */
@@ -66,7 +75,7 @@ class DisplayBlockTest extends ViewTestBase {
       ':li_class' => 'views-block' . drupal_html_class($edit['id']) . '-block-1',
       ':href' => \Drupal::Url('block.admin_add', array(
         'plugin_id' => 'views_block:' . $edit['id'] . '-block_1',
-        'theme' => 'stark',
+        'theme' => 'classy',
       )),
       ':text' => $edit['label'],
     );
@@ -105,7 +114,7 @@ class DisplayBlockTest extends ViewTestBase {
       ':li_class' => 'views-block' . drupal_html_class($edit['id']) . '-block-2',
       ':href' => \Drupal::Url('block.admin_add', array(
         'plugin_id' => 'views_block:' . $edit['id'] . '-block_2',
-        'theme' => 'stark',
+        'theme' => 'classy',
       )),
       ':text' => $edit['label'],
     );
@@ -117,7 +126,7 @@ class DisplayBlockTest extends ViewTestBase {
       ':li_class' => 'views-block' . drupal_html_class($edit['id']) . '-block-3',
       ':href' => \Drupal::Url('block.admin_add', array(
         'plugin_id' => 'views_block:' . $edit['id'] . '-block_3',
-        'theme' => 'stark',
+        'theme' => 'classy',
       )),
       ':text' => $edit['label'],
     );
@@ -131,13 +140,13 @@ class DisplayBlockTest extends ViewTestBase {
   protected function testDeleteBlockDisplay() {
     // To test all combinations possible we first place create two instances
     // of the block display of the first view.
-    $block_1 = $this->drupalPlaceBlock('views_block:test_view_block-block_1', array('title' => 'test_view_block-block_1:1'));
-    $block_2 = $this->drupalPlaceBlock('views_block:test_view_block-block_1', array('title' => 'test_view_block-block_1:2'));
+    $block_1 = $this->drupalPlaceBlock('views_block:test_view_block-block_1', array('label' => 'test_view_block-block_1:1'));
+    $block_2 = $this->drupalPlaceBlock('views_block:test_view_block-block_1', array('label' => 'test_view_block-block_1:2'));
 
     // Then we add one instance of blocks for each of the two displays of the
     // second view.
-    $block_3 = $this->drupalPlaceBlock('views_block:test_view_block2-block_1', array('title' => 'test_view_block2-block_1'));
-    $block_4 = $this->drupalPlaceBlock('views_block:test_view_block2-block_2', array('title' => 'test_view_block2-block_2'));
+    $block_3 = $this->drupalPlaceBlock('views_block:test_view_block2-block_1', array('label' => 'test_view_block2-block_1'));
+    $block_4 = $this->drupalPlaceBlock('views_block:test_view_block2-block_2', array('label' => 'test_view_block2-block_2'));
 
     $this->drupalGet('test-page');
     $this->assertBlockAppears($block_1);
@@ -242,7 +251,7 @@ class DisplayBlockTest extends ViewTestBase {
    */
   public function testBlockRendering() {
     // Create a block and set a custom title.
-    $block = $this->drupalPlaceBlock('views_block:test_view_block-block_1', array('title' => 'test_view_block-block_1:1', 'views_label' => 'Custom title'));
+    $block = $this->drupalPlaceBlock('views_block:test_view_block-block_1', array('label' => 'test_view_block-block_1:1', 'views_label' => 'Custom title'));
     $this->drupalGet('');
 
     $result = $this->xpath('//div[contains(@class, "region-sidebar-first")]/div[contains(@class, "block-views")]/h2');

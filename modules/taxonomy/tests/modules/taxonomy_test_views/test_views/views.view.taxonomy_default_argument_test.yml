@@ -3,6 +3,7 @@ status: true
 dependencies:
   module:
     - taxonomy
+    - user
 id: taxonomy_default_argument_test
 label: taxonomy_default_argument_test
 module: views
@@ -94,7 +95,7 @@ display:
             html: false
           hide_empty: false
           empty_zero: false
-          link_to_taxonomy: 1
+          link_to_taxonomy: true
           relationship: none
           group_type: group
           admin_label: ''
@@ -110,6 +111,7 @@ display:
           empty: ''
           hide_alter_empty: true
           convert_spaces: false
+          plugin_id: taxonomy
       filters: {  }
       sorts: {  }
       header: {  }

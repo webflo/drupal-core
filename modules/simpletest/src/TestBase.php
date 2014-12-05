@@ -203,6 +203,15 @@ abstract class TestBase {
   protected $originalSessionName;
 
   /**
+   * Set to TRUE to strict check all configuration saved.
+   *
+   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
+   *
+   * @var bool
+   */
+  protected $strictConfigSchema = FALSE;
+
+  /**
    * Constructor for Test.
    *
    * @param $test_id
@@ -1475,6 +1484,7 @@ abstract class TestBase {
         $this->container->get('lock'),
         $this->container->get('config.typed'),
         $this->container->get('module_handler'),
+        $this->container->get('module_installer'),
         $this->container->get('theme_handler'),
         $this->container->get('string_translation')
       );

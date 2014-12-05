@@ -18,6 +18,15 @@ use Drupal\simpletest\WebTestBase;
 class NumberFieldTest extends WebTestBase {
 
   /**
+   * Set to TRUE to strict check all configuration saved.
+   *
+   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
+   *
+   * @var bool
+   */
+  protected $strictConfigSchema = TRUE;
+
+  /**
    * Modules to enable.
    *
    * @var array
@@ -49,7 +58,7 @@ class NumberFieldTest extends WebTestBase {
       'entity_type' => 'entity_test',
       'type' => 'decimal',
       'settings' => array(
-        'precision' => 8, 'scale' => 4, 'decimal_separator' => '.',
+        'precision' => 8, 'scale' => 4,
       )
     ))->save();
     entity_create('field_config', array(
@@ -134,11 +143,12 @@ class NumberFieldTest extends WebTestBase {
 
     // Create a field with settings to validate.
     $field_name = Unicode::strtolower($this->randomMachineName());
-    entity_create('field_storage_config', array(
+    $storage = entity_create('field_storage_config', array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'integer',
-    ))->save();
+    ));
+    $storage->save();
 
     entity_create('field_config', array(
       'field_name' => $field_name,
@@ -162,6 +172,22 @@ class NumberFieldTest extends WebTestBase {
         'type' => 'number_integer',
       ))
       ->save();
+
+    // Check the storage schema.
+    $expected = array(
+      'columns' => array(
+        'value' => array(
+          'type' => 'int',
+          'not null' => FALSE,
+          'unsigned' => '',
+          'size' => 'normal'
+        ),
+      ),
+      'unique keys' => array(),
+      'indexes' => array(),
+      'foreign keys' => array()
+    );
+    $this->assertEqual($storage->getSchema(), $expected);
 
     // Display creation form.
     $this->drupalGet('entity_test/add');

@@ -1,8 +1,17 @@
-base_field: fid
-base_table: file_managed
-core: 8.x
-description: 'Find and manage files.'
+langcode: en
 status: true
+dependencies:
+  module:
+    - file
+    - user
+id: files
+label: Files
+module: file
+description: 'Find and manage files.'
+tag: default
+base_table: file_managed
+base_field: fid
+core: 8.x
 display:
   default:
     display_plugin: default
@@ -130,7 +139,7 @@ display:
               separator: ''
               empty_column: false
               responsive: priority-medium
-          default: 'changed'
+          default: changed
           empty_table: true
       row:
         type: fields
@@ -651,6 +660,8 @@ display:
       arguments: {  }
       group_by: true
       show_admin_links: true
+      field_langcode: '***LANGUAGE_language_content***'
+      field_langcode_add_to_query: null
   page_1:
     display_plugin: page
     id: page_1
@@ -668,7 +679,6 @@ display:
       display_description: ''
       defaults:
         pager: true
-        pager_options: true
         relationships: false
       relationships:
         fid:
@@ -679,6 +689,8 @@ display:
           group_type: group
           admin_label: 'File usage'
           required: false
+      field_langcode: '***LANGUAGE_language_content***'
+      field_langcode_add_to_query: null
   page_2:
     display_plugin: page
     id: page_2
@@ -691,7 +703,6 @@ display:
       defaults:
         empty: false
         pager: false
-        pager_options: false
         filters: false
         filter_groups: false
         fields: false
@@ -719,7 +730,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-      pager_options: false
       filters: {  }
       filter_groups:
         operator: AND
@@ -1028,11 +1038,5 @@ display:
           group_type: group
           admin_label: 'File usage'
           required: true
-label: Files
-module: file
-id: files
-tag: default
-langcode: en
-dependencies:
-  module:
-    - file
+      field_langcode: '***LANGUAGE_language_content***'
+      field_langcode_add_to_query: null

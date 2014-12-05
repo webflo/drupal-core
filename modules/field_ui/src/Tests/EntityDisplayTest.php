@@ -21,6 +21,7 @@ class EntityDisplayTest extends KernelTestBase {
 
   protected function setUp() {
     parent::setUp();
+    $this->installEntitySchema('node');
     $this->installConfig(array('field'));
   }
 
@@ -268,15 +269,14 @@ class EntityDisplayTest extends KernelTestBase {
    * Tests renaming and deleting a bundle.
    */
   public function testRenameDeleteBundle() {
-    $this->installEntitySchema('node');
-
     // Create a node bundle, display and form display object.
-    entity_create('node_type', array('type' => 'article'))->save();
+    $type = entity_create('node_type', array('type' => 'article'));
+    $type->save();
+    node_add_body_field($type);
     entity_get_display('node', 'article', 'default')->save();
     entity_get_form_display('node', 'article', 'default')->save();
 
     // Rename the article bundle and assert the entity display is renamed.
-    $type = node_type_load('article');
     $type->old_type = 'article';
     $type->type = 'article_rename';
     $type->save();

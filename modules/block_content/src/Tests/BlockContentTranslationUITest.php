@@ -18,6 +18,16 @@ use Drupal\content_translation\Tests\ContentTranslationUITest;
 class BlockContentTranslationUITest extends ContentTranslationUITest {
 
   /**
+   * Set to TRUE to strict check all configuration saved.
+   *
+   * @see \Drupal\Core\Config\Testing\ConfigSchemaChecker
+   *
+   * @var bool
+   */
+  protected $strictConfigSchema = TRUE;
+
+
+  /**
    * Modules to enable.
    *
    * @var array
@@ -38,6 +48,19 @@ class BlockContentTranslationUITest extends ContentTranslationUITest {
     $this->bundle = 'basic';
     $this->testLanguageSelector = FALSE;
     parent::setUp();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setupBundle() {
+    // Create the basic bundle since it is provided by standard.
+    $bundle = entity_create('block_content_type', array(
+      'id' => $this->bundle,
+      'label' => $this->bundle,
+      'revision' => FALSE
+    ));
+    $bundle->save();
   }
 
   /**

@@ -52,9 +52,9 @@ function content_translation_field_sync_widget(FieldDefinitionInterface $field) 
         'library' => array(
           'content_translation/drupal.content_translation.admin',
         ),
-        'js' => array(
-          array('data' => array('contentTranslationDependentOptions' => $settings), 'type' => 'setting'),
-        ),
+        'drupalSettings' => [
+          'contentTranslationDependentOptions' => $settings,
+        ],
       ),
     );
   }
@@ -79,7 +79,6 @@ function _content_translation_form_language_content_settings_form_alter(array &$
   $form['entity_types']['#default_value'] = $default;
 
   $form['#attached']['library'][] = 'content_translation/drupal.content_translation.admin';
-  $form['#attached']['js'][] = array('data' => drupal_get_path('module', 'content_translation') . '/content_translation.admin.js', 'type' => 'file');
 
   $dependent_options_settings = array();
   $entity_manager = Drupal::entityManager();
@@ -127,7 +126,7 @@ function _content_translation_form_language_content_settings_form_alter(array &$
   }
 
   $settings = array('dependent_selectors' => $dependent_options_settings);
-  $form['#attached']['js'][] = array('data' => array('contentTranslationDependentOptions' => $settings), 'type' => 'setting');
+  $form['#attached']['drupalSettings']['contentTranslationDependentOptions'] = $settings;
   $form['#validate'][] = 'content_translation_form_language_content_settings_validate';
   $form['#submit'][] = 'content_translation_form_language_content_settings_submit';
 }

@@ -26,17 +26,6 @@ class File extends WizardPluginBase {
   protected $createdColumn = 'created';
 
   /**
-   * Set default values for the path field options.
-   */
-  protected $pathField = array(
-    'id' => 'uri',
-    'table' => 'file_managed',
-    'field' => 'uri',
-    'exclude' => TRUE,
-    'file_download_path' => TRUE
-  );
-
-  /**
    * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::defaultDisplayOptions().
    */
   protected function defaultDisplayOptions() {
@@ -64,6 +53,7 @@ class File extends WizardPluginBase {
     $display_options['fields']['filename']['hide_empty'] = 0;
     $display_options['fields']['filename']['empty_zero'] = 0;
     $display_options['fields']['filename']['link_to_file'] = 1;
+    $display_options['fields']['filename']['plugin_id'] = 'file';
 
     return $display_options;
   }

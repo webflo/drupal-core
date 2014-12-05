@@ -31,21 +31,6 @@ class Node extends WizardPluginBase {
   protected $createdColumn = 'node_field_data-created';
 
   /**
-   * Set default values for the path field options.
-   */
-  protected $pathField = array(
-    'id' => 'nid',
-    'table' => 'node',
-    'field' => 'nid',
-    'exclude' => TRUE,
-    'link_to_node' => FALSE,
-    'alter' => array(
-      'alter_text' => TRUE,
-      'text' => 'node/[nid]'
-    )
-  );
-
-  /**
    * Set default values for the filters.
    */
   protected $filters = array(
@@ -53,7 +38,7 @@ class Node extends WizardPluginBase {
       'value' => TRUE,
       'table' => 'node_field_data',
       'field' => 'status',
-      'provider' => 'node'
+      'plugin_id' => 'boolean'
     )
   );
 
@@ -80,42 +65,6 @@ class Node extends WizardPluginBase {
     $options['titles_linked'] = $this->t('titles (linked)');
     $options['fields'] = $this->t('fields');
     return $options;
-  }
-
-  /**
-   * Adds the style options to the wizard form.
-   *
-   * @param array $form
-   *   The full wizard form array.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the wizard form.
-   * @param string $type
-   *   The display ID (e.g. 'page' or 'block').
-   */
-  protected function buildFormStyle(array &$form, FormStateInterface $form_state, $type) {
-    parent::buildFormStyle($form, $form_state, $type);
-    $style_form =& $form['displays'][$type]['options']['style'];
-    // Some style plugins don't support row plugins so stop here if that's the
-    // case.
-    if (!isset($style_form['row_plugin']['#default_value'])) {
-      return;
-    }
-    $row_plugin = $style_form['row_plugin']['#default_value'];
-    switch ($row_plugin) {
-      case 'full_posts':
-      case 'teasers':
-        $style_form['row_options']['links'] = array(
-          '#type' => 'select',
-          '#title' => $this->t('Should links be displayed below each node'),
-          '#title_display' => 'invisible',
-          '#options' => array(
-            1 => $this->t('with links (allow users to add comments, etc.)'),
-            0 => $this->t('without links'),
-          ),
-          '#default_value' => 1,
-        );
-        break;
-    }
   }
 
   /**
@@ -148,6 +97,7 @@ class Node extends WizardPluginBase {
     $display_options['fields']['title']['hide_empty'] = 0;
     $display_options['fields']['title']['empty_zero'] = 0;
     $display_options['fields']['title']['link_to_node'] = 1;
+    $display_options['fields']['title']['plugin_id'] = 'node';
 
     return $display_options;
   }
@@ -165,7 +115,8 @@ class Node extends WizardPluginBase {
         'table' => 'taxonomy_index',
         'field' => 'tid',
         'value' => $tids,
-        'vocabulary' => $form_state->getValue(array('show', 'tagged_with', 'vocabulary')),
+        'vid' => $form_state->getValue(array('show', 'tagged_with', 'vocabulary')),
+        'plugin_id' => 'taxonomy_index_tid',
       );
       // If the user entered more than one valid term in the autocomplete
       // field, they probably intended both of them to be applied.
@@ -209,21 +160,20 @@ class Node extends WizardPluginBase {
     switch ($row_plugin) {
       case 'full_posts':
         $display_options['row']['type'] = 'entity:node';
-        $display_options['row']['options']['build_mode'] = 'full';
-        $display_options['row']['options']['links'] = !empty($row_options['links']);
+        $display_options['row']['options']['view_mode'] = 'full';
         break;
       case 'teasers':
         $display_options['row']['type'] = 'entity:node';
-        $display_options['row']['options']['build_mode'] = 'teaser';
-        $display_options['row']['options']['links'] = !empty($row_options['links']);
+        $display_options['row']['options']['view_mode'] = 'teaser';
         break;
       case 'titles_linked':
-        $display_options['row']['type'] = 'fields';
-        $display_options['field']['title']['link_to_node'] = 1;
-        break;
       case 'titles':
         $display_options['row']['type'] = 'fields';
-        $display_options['field']['title']['link_to_node'] = 0;
+        $display_options['fields']['title']['id'] = 'title';
+        $display_options['fields']['title']['table'] = 'node_field_data';
+        $display_options['fields']['title']['field'] = 'title';
+        $display_options['fields']['title']['link_to_node'] = ($row_plugin == 'titles_linked');
+        $display_options['fields']['title']['plugin_id'] = 'node';
         break;
     }
   }

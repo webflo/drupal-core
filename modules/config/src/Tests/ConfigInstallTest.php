@@ -16,6 +16,7 @@ use Drupal\simpletest\KernelTestBase;
  * @see \Drupal\Core\Config\ConfigInstaller
  */
 class ConfigInstallTest extends KernelTestBase {
+
   protected function setUp() {
     parent::setUp();
 

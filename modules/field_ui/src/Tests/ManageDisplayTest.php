@@ -8,7 +8,6 @@
 namespace Drupal\field_ui\Tests;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\simpletest\WebTestBase;
@@ -20,7 +19,6 @@ use Drupal\simpletest\WebTestBase;
  */
 class ManageDisplayTest extends WebTestBase {
 
-  use SchemaCheckTestTrait;
   use FieldUiTestTrait;
 
   /**
@@ -141,7 +139,6 @@ class ManageDisplayTest extends WebTestBase {
     $display = entity_load('entity_view_display', 'node.' . $this->type . '.default', TRUE);
     $this->assertEqual($display->getRenderer('field_test')->getThirdPartySetting('field_third_party_test', 'field_test_field_formatter_third_party_settings_form'), 'foo');
     $this->assertTrue(in_array('field_third_party_test', $display->calculateDependencies()['module']), 'The display has a dependency on field_third_party_test module.');
-    $this->assertConfigSchema(\Drupal::service('config.typed'), $display->getEntityType()->getConfigPrefix() . '.' . $display->id(), $display->toArray());
 
     // Confirm that the third party settings are not updated on the settings form.
     $this->drupalPostAjaxForm(NULL, array(), "field_test_settings_edit");
@@ -248,7 +245,6 @@ class ManageDisplayTest extends WebTestBase {
     $display = entity_load('entity_form_display', 'node.' . $this->type . '.default', TRUE);
     $this->assertEqual($display->getRenderer('field_test')->getThirdPartySetting('field_third_party_test', 'field_test_widget_third_party_settings_form'), 'foo');
     $this->assertTrue(in_array('field_third_party_test', $display->calculateDependencies()['module']), 'Form display does not have a dependency on field_third_party_test module.');
-    $this->assertConfigSchema(\Drupal::service('config.typed'), $display->getEntityType()->getConfigPrefix() . '.' . $display->id(), $display->toArray());
 
     // Confirm that the third party settings are not updated on the settings form.
     $this->drupalPostAjaxForm(NULL, array(), "field_test_settings_edit");

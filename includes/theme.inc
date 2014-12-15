@@ -9,6 +9,7 @@
  */
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
@@ -1095,9 +1096,9 @@ function template_preprocess_item_list(&$variables) {
         // If this child element does not specify how it can be rendered, then
         // we need to inherit the render properties of the current list.
         if (!isset($child['#type']) && !isset($child['#theme']) && !isset($child['#markup'])) {
-          // Since theme_item_list() supports both strings and render arrays as
-          // items, the items of the nested list may have been specified as the
-          // child elements of the nested list, instead of #items. For
+          // Since item-list.html.twig supports both strings and render arrays
+          // as items, the items of the nested list may have been specified as
+          // the child elements of the nested list, instead of #items. For
           // convenience, we automatically move them into #items.
           if (!isset($child['#items'])) {
             // This is the same condition as in
@@ -1352,7 +1353,7 @@ function template_preprocess_html(&$variables) {
   }
   else {
     $segment = explode('/', $path);
-    $variables['attributes']['class'][] = 'path-' . drupal_html_class($segment[1]);
+    $variables['attributes']['class'][] = 'path-' . Html::getClass($segment[1]);
   }
 
   $site_config = \Drupal::config('system.site');
@@ -1553,7 +1554,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
 }
 
 /**
- * Prepare variables for maintenance page templates.
+ * Prepares variables for maintenance page templates.
  *
  * Default template: maintenance-page.html.twig.
  *
@@ -1638,7 +1639,7 @@ function template_preprocess_field(&$variables, $hook) {
 
   // Add default CSS classes. Since there can be many fields rendered on a page,
   // save some overhead by calling strtr() directly instead of
-  // drupal_html_class().
+  // \Drupal\Component\Utility\Html::getClass().
   $variables['entity_type_css'] = strtr($element['#entity_type'], '_', '-');
   $variables['field_name_css'] = strtr($element['#field_name'], '_', '-');
   $variables['field_type_css'] = strtr($element['#field_type'], '_', '-');

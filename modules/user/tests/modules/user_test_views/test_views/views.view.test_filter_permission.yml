@@ -83,10 +83,12 @@ display:
           hide_alter_empty: true
           link_to_user: false
           plugin_id: user
+          entity_type: user
+          entity_field: uid
       filters:
         permission:
           id: permission
-          table: users_roles
+          table: user__roles
           field: permission
           relationship: none
           group_type: group
@@ -136,5 +138,7 @@ display:
           expose:
             label: ''
           plugin_id: standard
+          entity_type: user
+          entity_field: uid
       field_langcode: '***LANGUAGE_language_content***'
       field_langcode_add_to_query: null

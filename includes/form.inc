@@ -31,16 +31,6 @@ function drupal_form_submit($form_arg, FormStateInterface $form_state) {
 }
 
 /**
- * Removes internal Form API elements and buttons from submitted form values.
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.0.
- *   Use $form_state->cleanValues().
- */
-function form_state_values_clean(FormStateInterface $form_state) {
-  $form_state->cleanValues();
-}
-
-/**
  * Prepares variables for select element templates.
  *
  * Default template: select.html.twig.
@@ -486,7 +476,7 @@ function template_preprocess_form_element(&$variables) {
  *
  * Form element labels include the #title and a #required marker. The label is
  * associated with the element itself by the element #id. Labels may appear
- * before or after elements, depending on theme_form_element() and
+ * before or after elements, depending on form-element.html.twig and
  * #title_display.
  *
  * This function will not be called for elements with no labels, depending on

@@ -17,6 +17,7 @@ use Drupal\simpletest\KernelTestBase;
  * @group config
  */
 class SchemaCheckTraitTest extends KernelTestBase {
+
   use SchemaCheckTrait;
 
   /**

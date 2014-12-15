@@ -24,23 +24,18 @@ class SchemaConfigListenerTest extends KernelTestBase {
   public static $modules = array('config_test');
 
   /**
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = TRUE;
-
-  /**
    * Tests \Drupal\Core\Config\Testing\ConfigSchemaChecker.
    */
   public function testConfigSchemaChecker() {
     // Test a non-existing schema.
     $message = 'Expected SchemaIncompleteException thrown';
     try {
-      \Drupal::config('config_schema_test.noschema')->set('foo', 'bar')->save();
+      \Drupal::config('config_schema_test.schemaless')->set('foo', 'bar')->save();
       $this->fail($message);
     }
     catch (SchemaIncompleteException $e) {
       $this->pass($message);
-      $this->assertEqual('No schema for config_schema_test.noschema', $e->getMessage());
+      $this->assertEqual('No schema for config_schema_test.schemaless', $e->getMessage());
     }
 
     // Test a valid schema.

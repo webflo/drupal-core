@@ -25,23 +25,18 @@ class SchemaConfigListenerWebTest extends WebTestBase {
   public static $modules = array('config_test');
 
   /**
-   * {@inheritdoc}
-   */
-  protected $strictConfigSchema = TRUE;
-
-  /**
    * Tests \Drupal\Core\Config\Testing\ConfigSchemaChecker.
    */
   public function testConfigSchemaChecker() {
     // Test a non-existing schema.
     $msg = 'Expected SchemaIncompleteException thrown';
     try {
-      \Drupal::config('config_schema_test.noschema')->set('foo', 'bar')->save();
+      \Drupal::config('config_schema_test.schemaless')->set('foo', 'bar')->save();
       $this->fail($msg);
     }
     catch (SchemaIncompleteException $e) {
       $this->pass($msg);
-      $this->assertEqual('No schema for config_schema_test.noschema', $e->getMessage());
+      $this->assertEqual('No schema for config_schema_test.schemaless', $e->getMessage());
     }
 
     // Test a valid schema.
@@ -71,7 +66,7 @@ class SchemaConfigListenerWebTest extends WebTestBase {
 
     // Test that the config event listener is working in the child site.
     $this->drupalGet('config_test/schema_listener');
-    $this->assertText('No schema for config_schema_test.noschema');
+    $this->assertText('No schema for config_schema_test.schemaless');
   }
 
 }

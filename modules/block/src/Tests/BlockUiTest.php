@@ -7,6 +7,7 @@
 
 namespace Drupal\block\Tests;
 
+use Drupal\Component\Utility\Html;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -21,7 +22,7 @@ class BlockUiTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('block', 'block_test');
+  public static $modules = array('block', 'block_test', 'help');
 
   protected $regions;
 
@@ -80,7 +81,7 @@ class BlockUiTest extends WebTestBase {
    * Test block demo page exists and functions correctly.
    */
   public function testBlockDemoUiPage() {
-    $this->drupalPlaceBlock('system_help_block', array('region' => 'help'));
+    $this->drupalPlaceBlock('help_block', array('region' => 'help'));
     $this->drupalGet('admin/structure/block');
     $this->clickLink(t('Demonstrate block regions (@theme)', array('@theme' => 'Classy')));
     $elements = $this->xpath('//div[contains(@class, "region-highlighted")]/div[contains(@class, "block-region") and contains(text(), :title)]', array(':title' => 'Highlighted'));
@@ -200,7 +201,7 @@ class BlockUiTest extends WebTestBase {
 
     // After adding a block, it will indicate which block was just added.
     $this->drupalPostForm('admin/structure/block/add/system_powered_by_block', $block, t('Save block'));
-    $this->assertUrl('admin/structure/block/list/classy?block-placement=' . drupal_html_class($block['id']));
+    $this->assertUrl('admin/structure/block/list/classy?block-placement=' . Html::getClass($block['id']));
 
     // Resaving the block page will remove the block indicator.
     $this->drupalPostForm(NULL, array(), t('Save blocks'));

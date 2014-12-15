@@ -48,7 +48,7 @@ class EntityDisplayTest extends KernelTestBase {
     $this->assertEqual($display->getComponent('component_2'), $expected['component_2']);
 
     // Check that arbitrary options are correctly stored.
-    $expected['component_3'] = array('weight' => 10, 'foo' => 'bar');
+    $expected['component_3'] = array('weight' => 10, 'third_party_settings' => array('field_test' => array('foo' => 'bar')));
     $display->setComponent('component_3', $expected['component_3']);
     $this->assertEqual($display->getComponent('component_3'), $expected['component_3']);
 
@@ -69,7 +69,9 @@ class EntityDisplayTest extends KernelTestBase {
       'label' => 'hidden',
       'type' => 'string',
       'weight' => -5,
-      'settings' => array(),
+      'settings' => array(
+        'link_to_entity' => FALSE,
+      ),
       'third_party_settings' => array(),
     );
     $this->assertEqual($display->getComponents(), $expected);

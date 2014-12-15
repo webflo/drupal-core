@@ -92,7 +92,6 @@ abstract class QuickEditTestBase extends KernelTestBase {
     entity_get_form_display('entity_test', 'entity_test', 'default')
       ->setComponent($field_name, array(
         'type' => $widget_type,
-        'label' => $label,
         'settings' => $widget_settings,
       ))
       ->save();

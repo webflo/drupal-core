@@ -9,6 +9,7 @@ namespace Drupal\link\Tests;
 
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Unicode;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Url;
 use Drupal\link\LinkItemInterface;
 use Drupal\simpletest\WebTestBase;
@@ -106,6 +107,7 @@ class LinkFieldTest extends WebTestBase {
       'http://www.example.com/',
     );
     $valid_internal_entries = array(
+      '<front>',
       'entity_test/add',
       'a/path/alias',
     );
@@ -124,6 +126,8 @@ class LinkFieldTest extends WebTestBase {
     );
 
     // Test external and internal URLs for 'link_type' = LinkItemInterface::LINK_GENERIC.
+    $this->field->settings['link_type'] = LinkItemInterface::LINK_GENERIC;
+    $this->field->save();
     $this->assertValidEntries($field_name, $valid_external_entries + $valid_internal_entries);
     $this->assertInvalidEntries($field_name, $invalid_external_entries + $invalid_internal_entries);
 
@@ -157,7 +161,27 @@ class LinkFieldTest extends WebTestBase {
       preg_match('|entity_test/manage/(\d+)|', $this->url, $match);
       $id = $match[1];
       $this->assertText(t('entity_test @id has been created.', array('@id' => $id)));
-      $this->assertRaw($value);
+
+      // Verify that the link URL appears correctly in link field widget.
+      $widget_value = $value;
+      if (!UrlHelper::isExternal($value)) {
+        // Get un-aliased path for internal paths.
+        $widget_value = \Drupal::service('path.alias_manager')->getPathByAlias($value);
+        // Special internal paths are routes therefore URL will be generated
+        // from route name in formatter.
+        if (preg_match('/^<[^>]+>$/', $value)) {
+          $value = Url::fromRoute($value);
+        }
+        // Internal paths may contain slashes therefore URL needs to be
+        // sanitized.
+        $value = String::checkPlain($value);
+      }
+      $this->assertFieldByName("{$field_name}[0][url]", $widget_value, t('The URL @url in entity edit form is correct.', array('@url' => $widget_value)));
+
+      // Verify that the link appears as expected.
+      $this->drupalGet('entity_test/' . $id);
+      $this->assertText($field_name);
+      $this->assertLinkByHref($value);
     }
   }
 

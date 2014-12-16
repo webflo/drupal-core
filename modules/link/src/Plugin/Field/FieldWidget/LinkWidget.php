@@ -10,6 +10,7 @@ namespace Drupal\link\Plugin\Field\FieldWidget;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\link\LinkItemInterface;
 
 /**
@@ -39,14 +40,42 @@ class LinkWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-
+    // Link URL value can be either URL for external site that was provided
+    // by the user or generated URL from route name for external path.
     $default_url_value = NULL;
-    if (isset($items[$delta]->url)) {
-      if ($url = \Drupal::pathValidator()->getUrlIfValid($items[$delta]->url)) {
-        $url->setOptions($items[$delta]->options);
-        $default_url_value = ltrim($url->toString(), '/');
+    $url = NULL;
+
+    // Get url object for internal paths.
+    if (!empty($items[$delta]->route_name)) {
+      $url = Url::fromRoute($items[$delta]->route_name, $items[$delta]->route_parameters);
+    }
+    // Get url object for external paths.
+    else if (!empty($items[$delta]->url)) {
+      $url = \Drupal::pathValidator()->getUrlIfValid($items[$delta]->url);
+    }
+
+    if ($url) {
+      $url->setOptions($items[$delta]->options);
+      $default_url_value = ltrim($url->toString(), '/');
+
+      // Remove the base path from the URL to internal paths.
+      if (!$url->isExternal()) {
+        // Check if link points to a special route name that conforms to the
+        // pattern of "<[route]>" which is applied to commonly used routes
+        // like <front>, <none> and <current>. In that case display the route
+        // name in the widget as URL value.
+        if (preg_match('/^<[^>]+>$/', $items[$delta]->route_name)) {
+          $default_url_value = $items[$delta]->route_name;
+        }
+        else {
+          // Subtract
+          $default_url_value = substr($url->toString(), strlen(\Drupal::request()->getBasePath() . '/'));
+          // Get un-aliased URL.
+          $default_url_value = \Drupal::service('path.alias_manager')->getPathByAlias($default_url_value);
+        }
       }
     }
+
     $element['url'] = array(
       '#type' => 'url',
       '#title' => $this->t('URL'),
@@ -205,13 +234,13 @@ class LinkWidget extends WidgetBase {
           return $values;
         }
 
-        // @todo Don't use the toArray method here. Removed once it is
-        //   deprecated.
-        $value += $url->toArray();
+        $value['options'] = $url->getOptions();
 
         // Reset the URL value to contain only the path.
         if (!$url->isExternal() && $this->supportsInternalLinks()) {
-          $value['url'] = substr($url->toString(), strlen(\Drupal::request()->getBasePath() . '/'));
+          $value['url'] = NULL;
+          $value['route_name'] = $url->getRouteName();
+          $value['route_parameters'] = $url->getRouteParameters();
         }
       }
     }

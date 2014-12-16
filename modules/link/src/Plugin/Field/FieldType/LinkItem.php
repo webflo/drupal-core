@@ -165,7 +165,8 @@ class LinkItem extends FieldItemBase implements LinkItemInterface {
    * {@inheritdoc}
    */
   public function isEmpty() {
-    $value = $this->get('url')->getValue();
+    $key = $this->isExternal() ? 'url' : 'route_name';
+    $value = $this->get($key)->getValue();
     return $value === NULL || $value === '';
   }
 

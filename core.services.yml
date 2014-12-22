@@ -297,6 +297,11 @@ services:
     tags:
       - { name: module_install.uninstall_validator }
     arguments: ['@entity.manager', '@string_translation']
+  field_uninstall_validator:
+    class: Drupal\Core\Field\FieldModuleUninstallValidator
+    tags:
+      - { name: module_install.uninstall_validator }
+    arguments: ['@entity.manager', '@string_translation']
   theme_handler:
     class: Drupal\Core\Extension\ThemeHandler
     arguments: ['@app.root', '@config.factory', '@module_handler', '@state', '@info_parser', '@logger.channel.default', '@asset.css.collection_optimizer', '@config.installer', '@config.manager', '@router.builder_indicator']
@@ -886,7 +891,6 @@ services:
     parent: default_plugin_manager
   stream_wrapper_manager:
     class: Drupal\Core\StreamWrapper\StreamWrapperManager
-    arguments: ['@module_handler']
     calls:
       - [setContainer, ['@service_container']]
   stream_wrapper.public:

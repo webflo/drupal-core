@@ -30,7 +30,7 @@ class View extends RenderElement {
       '#name' => NULL,
       '#display_id' => 'default',
       '#arguments' => array(),
-      '#embed' => FALSE,
+      '#embed' => TRUE,
     );
   }
 

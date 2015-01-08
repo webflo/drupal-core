@@ -39,7 +39,7 @@ class AttachedAssetsTest extends KernelTestBase {
     parent::setUp();
 
     // Disable preprocessing.
-    \Drupal::config('system.performance')
+    $this->config('system.performance')
       ->set('css.preprocess', FALSE)
       ->set('js.preprocess', FALSE)
       ->save();
@@ -146,7 +146,7 @@ class AttachedAssetsTest extends KernelTestBase {
    */
   function testAggregatedAttributes() {
     // Enable aggregation.
-    \Drupal::config('system.performance')->set('js.preprocess', 1)->save();
+    $this->config('system.performance')->set('js.preprocess', 1)->save();
 
     $build['#attached']['library'][] = 'common_test/js-attributes';
     drupal_process_attached($build);
@@ -245,7 +245,7 @@ class AttachedAssetsTest extends KernelTestBase {
     drupal_process_attached($build);
 
     $js = drupal_get_js();
-    $this->assertTrue(strpos($js, 'core/assets/vendor/backbone/backbone.js?v=1.1.0') > 0 && strpos($js, 'core/assets/vendor/domready/ready.min.js?v=1.0.7') > 0 , 'JavaScript version identifiers correctly appended to URLs');
+    $this->assertTrue(strpos($js, 'core/assets/vendor/backbone/backbone-min.js?v=1.1.2') > 0 && strpos($js, 'core/assets/vendor/domready/ready.min.js?v=1.0.7') > 0 , 'JavaScript version identifiers correctly appended to URLs');
   }
 
   /**
@@ -334,7 +334,7 @@ class AttachedAssetsTest extends KernelTestBase {
     $js = drupal_get_js();
     $this->assertTrue(strpos($js, 'lighter.css') < strpos($js, 'first.js'), 'Lighter CSS assets are rendered first.');
     $this->assertTrue(strpos($js, 'lighter.js') < strpos($js, 'first.js'), 'Lighter JavaScript assets are rendered first.');
-    $this->assertTrue(strpos($js, 'before-jquery.js') < strpos($js, 'core/assets/vendor/jquery/jquery.js'), 'Rendering a JavaScript file above jQuery.');
+    $this->assertTrue(strpos($js, 'before-jquery.js') < strpos($js, 'core/assets/vendor/jquery/jquery.min.js'), 'Rendering a JavaScript file above jQuery.');
   }
 
   /**
@@ -372,6 +372,28 @@ class AttachedAssetsTest extends KernelTestBase {
     drupal_process_attached($build);
     $scripts = drupal_get_js();
     $this->assertTrue(strpos($scripts, 'core/assets/vendor/jquery-form/jquery.form.js'), 'Altered library dependencies are added to the page.');
+  }
+
+  /**
+   * Dynamically defines an asset library and alters it.
+   */
+  function testDynamicLibrary() {
+    /** @var \Drupal\Core\Asset\LibraryDiscoveryInterface $library_discovery */
+    $library_discovery = \Drupal::service('library.discovery');
+    // Retrieve a dynamic library definition.
+    // @see common_test_library_info_build()
+    \Drupal::state()->set('common_test.library_info_build_test', TRUE);
+    $library_discovery->clearCachedDefinitions();
+    $dynamic_library = $library_discovery->getLibraryByName('common_test', 'dynamic_library');
+    $this->assertTrue(is_array($dynamic_library));
+    if ($this->assertTrue(isset($dynamic_library['version']))) {
+      $this->assertIdentical('1.0', $dynamic_library['version']);
+    }
+    // Make sure the dynamic library definition could be altered.
+    // @see common_test_library_info_alter()
+    if ($this->assertTrue(isset($dynamic_library['dependencies']))) {
+      $this->assertIdentical(['core/jquery'], $dynamic_library['dependencies']);
+    }
   }
 
   /**

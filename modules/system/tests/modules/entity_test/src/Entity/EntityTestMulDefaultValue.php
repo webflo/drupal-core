@@ -33,7 +33,8 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "id" = "id",
  *     "uuid" = "uuid",
  *     "bundle" = "type",
- *     "label" = "name"
+ *     "label" = "name",
+ *     "langcode" = "langcode"
  *   },
  *   links = {
  *     "canonical" = "entity.entity_test_mul.edit_form",

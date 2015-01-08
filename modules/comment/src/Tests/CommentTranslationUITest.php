@@ -9,7 +9,6 @@ namespace Drupal\comment\Tests;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\content_translation\Tests\ContentTranslationUITest;
-use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests the Comment Translation UI.
@@ -22,6 +21,13 @@ class CommentTranslationUITest extends ContentTranslationUITest {
    * The subject of the test comment.
    */
   protected $subject;
+
+  /**
+   * An administrative user with permission to administer comments.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $adminUser;
 
   /**
    * Modules to install.
@@ -61,16 +67,6 @@ class CommentTranslationUITest extends ContentTranslationUITest {
    */
   protected function getTranslatorPermissions() {
     return array_merge(parent::getTranslatorPermissions(), array('post comments', 'administer comments', 'access comments'));
-  }
-
-  /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITest::setupTestFields().
-   */
-  function setupTestFields() {
-    parent::setupTestFields();
-    $field_storage = FieldStorageConfig::loadByName('comment', 'comment_body');
-    $field_storage->translatable = TRUE;
-    $field_storage->save();
   }
 
   /**
@@ -143,8 +139,8 @@ class CommentTranslationUITest extends ContentTranslationUITest {
    * Tests translate link on comment content admin page.
    */
   function testTranslateLinkCommentAdminPage() {
-    $this->admin_user = $this->drupalCreateUser(array_merge(parent::getTranslatorPermissions(), array('access administration pages', 'administer comments', 'skip comment approval')));
-    $this->drupalLogin($this->admin_user);
+    $this->adminUser = $this->drupalCreateUser(array_merge(parent::getTranslatorPermissions(), array('access administration pages', 'administer comments', 'skip comment approval')));
+    $this->drupalLogin($this->adminUser);
 
     $cid_translatable = $this->createEntity(array(), $this->langcodes[0]);
     $cid_untranslatable = $this->createEntity(array(), $this->langcodes[0], 'comment');

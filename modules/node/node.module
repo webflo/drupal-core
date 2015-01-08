@@ -11,30 +11,23 @@
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
-use Drupal\language\Entity\ContentLanguageSettings;
-use Symfony\Component\HttpFoundation\Response;
-use Drupal\Core\Database\StatementInterface;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\SelectInterface;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Database\StatementInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\language\ConfigurableLanguageInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
-use Drupal\node\NodeTypeInterface;
 use Drupal\node\NodeInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
-use Drupal\Core\Template\Attribute;
-use Drupal\file\Entity\File;
-use Drupal\language\ConfigurableLanguageInterface;
-use Drupal\block\Entity\Block;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeTypeInterface;
 
 /**
  * Denotes that the node is not published.
@@ -371,30 +364,8 @@ function node_add_body_field(NodeTypeInterface $type, $label = 'Body') {
  */
 function node_entity_extra_field_info() {
   $extra = array();
-  $module_language_enabled = \Drupal::moduleHandler()->moduleExists('language');
   $description = t('Node module element');
-
   foreach (node_type_get_types() as $bundle) {
-    // Add the 'language' select if Language module is enabled and the bundle
-    // has multilingual support.
-    // Visibility of the ordering of the language selector is the same as on the
-    // node/add form.
-    if ($module_language_enabled) {
-      $configuration = ContentLanguageSettings::loadByEntityTypeBundle('node', $bundle->type);
-      if ($configuration->isLanguageAlterable()) {
-        $extra['node'][$bundle->type]['form']['langcode'] = array(
-          'label' => t('Language'),
-          'description' => $description,
-          'weight' => 0,
-        );
-      }
-    }
-    $extra['node'][$bundle->type]['display']['langcode'] = array(
-      'label' => t('Language'),
-      'description' => $description,
-      'weight' => 0,
-      'visible' => FALSE,
-    );
     $extra['node'][$bundle->type]['display']['links'] = array(
       'label' => t('Links'),
       'description' => $description,
@@ -862,39 +833,6 @@ function node_page_top(array &$page) {
 /**
  * Implements hook_form_FORM_ID_alter().
  *
- * Alters the System module's site information settings form to add a global
- * default setting for number of posts to show on node listing pages.
- *
- * @see node_page_default()
- * @see node_form_system_site_information_settings_form_submit()
- */
-function node_form_system_site_information_settings_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $options = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30);
-  $form['front_page']['default_nodes_main'] = array(
-    '#type' => 'select',
-    '#title' => t('Number of posts on front page'),
-    '#default_value' => \Drupal::config('node.settings')->get('items_per_page'),
-    '#options' => array_combine($options, $options),
-    '#access' => (\Drupal::config('system.site')->get('page.front') == 'node'),
-    '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
-  );
-  $form['#submit'][] = 'node_form_system_site_information_settings_form_submit';
-}
-
-/**
- * Form submission handler for system_site_information_settings().
- *
- * @see node_form_system_site_information_settings_form_alter()
- */
-function node_form_system_site_information_settings_form_submit($form, FormStateInterface $form_state) {
-  \Drupal::config('node.settings')
-    ->set('items_per_page', $form_state->getValue('default_nodes_main'))
-    ->save();
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
  * Alters the theme form to use the admin theme on node editing.
  *
  * @see node_form_system_themes_admin_form_submit()
@@ -1249,7 +1187,7 @@ function node_access_rebuild($batch_mode = FALSE) {
  *   An array of contextual key/value information for rebuild batch process.
  */
 function _node_access_rebuild_batch_operation(&$context) {
-  $node_storage = $this->container->get('entity.manager')->getStorage('node');
+  $node_storage = \Drupal::entityManager()->getStorage('node');
   if (empty($context['sandbox'])) {
     // Initiate multistep processing.
     $context['sandbox']['progress'] = 0;

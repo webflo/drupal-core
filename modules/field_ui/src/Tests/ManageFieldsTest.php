@@ -217,6 +217,12 @@ class ManageFieldsTest extends WebTestBase {
     $this->assertFieldByXPath("//select[@name='field_storage[cardinality]']", 'number');
     $this->assertFieldByXPath("//input[@name='field_storage[cardinality_number]']", 6);
 
+    // Check that tabs displayed.
+    $this->assertLink(t('Edit'));
+    $this->assertLinkByHref('admin/structure/types/manage/article/fields/node.article.body');
+    $this->assertLink(t('Field settings'));
+    $this->assertLinkByHref($field_edit_path);
+
     // Set to unlimited.
     $edit = array(
       'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
@@ -287,7 +293,7 @@ class ManageFieldsTest extends WebTestBase {
   function testFieldPrefix() {
     // Change default field prefix.
     $field_prefix = strtolower($this->randomMachineName(10));
-    \Drupal::config('field_ui.settings')->set('field_prefix', $field_prefix)->save();
+    $this->config('field_ui.settings')->set('field_prefix', $field_prefix)->save();
 
     // Create a field input and label exceeding the new maxlength, which is 22.
     $field_exceed_max_length_label = $this->randomString(23);
@@ -422,7 +428,7 @@ class ManageFieldsTest extends WebTestBase {
    */
   function testDisallowedFieldNames() {
     // Reset the field prefix so we can test properly.
-    \Drupal::config('field_ui.settings')->set('field_prefix', '')->save();
+    $this->config('field_ui.settings')->set('field_prefix', '')->save();
 
     $label = 'Disallowed field';
     $edit = array(

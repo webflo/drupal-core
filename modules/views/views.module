@@ -56,20 +56,18 @@ function views_views_pre_render($view) {
   // If using AJAX, send identifying data about this view.
   if ($view->ajaxEnabled() && empty($view->is_attachment) && empty($view->live_preview)) {
     $view->element['#attached']['drupalSettings']['views'] = array(
-      'views' => array(
-        'ajax_path' => \Drupal::url('views.ajax'),
-        'ajaxViews' => array(
-          'views_dom_id:' . $view->dom_id => array(
-            'view_name' => $view->storage->id(),
-            'view_display_id' => $view->current_display,
-            'view_args' => String::checkPlain(implode('/', $view->args)),
-            'view_path' => String::checkPlain(Url::fromRoute('<current>')->toString()),
-            'view_base_path' => $view->getPath(),
-            'view_dom_id' => $view->dom_id,
-            // To fit multiple views on a page, the programmer may have
-            // overridden the display's pager_element.
-            'pager_element' => isset($view->pager) ? $view->pager->getPagerId() : 0,
-          ),
+      'ajax_path' => \Drupal::url('views.ajax'),
+      'ajaxViews' => array(
+        'views_dom_id:' . $view->dom_id => array(
+          'view_name' => $view->storage->id(),
+          'view_display_id' => $view->current_display,
+          'view_args' => String::checkPlain(implode('/', $view->args)),
+          'view_path' => String::checkPlain(Url::fromRoute('<current>')->toString()),
+          'view_base_path' => $view->getPath(),
+          'view_dom_id' => $view->dom_id,
+          // To fit multiple views on a page, the programmer may have
+          // overridden the display's pager_element.
+          'pager_element' => isset($view->pager) ? $view->pager->getPagerId() : 0,
         ),
       ),
     );
@@ -472,7 +470,7 @@ function views_field_config_create(FieldConfigInterface $field) {
  * Implements hook_ENTITY_TYPE_update() for 'field_config'.
  */
 function views_field_config_update(FieldConfigInterface $field) {
-  Cache::deleteTags(array('extension' => 'views'));
+  Cache::invalidateTags(array('extension' => 'views'));
   \Drupal::cache('render')->deleteAll();
 }
 
@@ -480,7 +478,7 @@ function views_field_config_update(FieldConfigInterface $field) {
  * Implements hook_ENTITY_TYPE_delete() for 'field_config'.
  */
 function views_field_config_delete(FieldConfigInterface $field) {
-  Cache::deleteTags(array('extension' => 'views'));
+  Cache::invalidateTags(array('extension' => 'views'));
   \Drupal::cache('render')->deleteAll();
 }
 
@@ -489,7 +487,7 @@ function views_field_config_delete(FieldConfigInterface $field) {
  */
 function views_invalidate_cache() {
   // Clear Views' info cache entries.
-  Cache::deleteTags(array('extension' => 'views'));
+  Cache::invalidateTags(array('extension' => 'views'));
 
   // Set the menu as needed to be rebuilt.
   \Drupal::service('router.builder_indicator')->setRebuildNeeded();
@@ -594,6 +592,13 @@ function views_hook_info() {
     'views_post_render',
     'views_query_alter',
   ), array('group' => 'views_execution'));
+
+  $hooks['field_views_data'] = array(
+    'group' => 'views',
+  );
+  $hooks['field_views_data_alter'] = array(
+    'group' => 'views',
+  );
 
   return $hooks;
 }

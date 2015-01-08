@@ -100,11 +100,11 @@ class ShortcutLinksTest extends ShortcutTestBase {
    */
   public function testShortcutQuickLink() {
     \Drupal::service('theme_handler')->install(array('seven'));
-    \Drupal::config('system.theme')->set('admin', 'seven')->save();
-    $this->container->get('config.factory')->get('node.settings')->set('use_admin_theme', '1')->save();
+    $this->config('system.theme')->set('admin', 'seven')->save();
+    $this->config('node.settings')->set('use_admin_theme', '1')->save();
     $this->container->get('router.builder')->rebuild();
 
-    $this->drupalLogin($this->root_user);
+    $this->drupalLogin($this->rootUser);
     $this->drupalGet('admin/config/system/cron');
 
     // Test the "Add to shortcuts" link.
@@ -165,7 +165,7 @@ class ShortcutLinksTest extends ShortcutTestBase {
    * Tests that changing the route of a shortcut link works.
    */
   public function testShortcutLinkChangeRoute() {
-    $this->drupalLogin($this->root_user);
+    $this->drupalLogin($this->rootUser);
     $this->drupalGet('admin/content');
     $this->assertResponse(200);
     // Disable the view.
@@ -206,7 +206,7 @@ class ShortcutLinksTest extends ShortcutTestBase {
   public function testNoShortcutLink() {
     // Change to a theme that displays shortcuts.
     \Drupal::service('theme_handler')->install(array('seven'));
-    \Drupal::config('system.theme')
+    $this->config('system.theme')
       ->set('default', 'seven')
       ->save();
 
@@ -237,12 +237,12 @@ class ShortcutLinksTest extends ShortcutTestBase {
   public function testAccessShortcutsPermission() {
     // Change to a theme that displays shortcuts.
     \Drupal::service('theme_handler')->install(array('seven'));
-    \Drupal::config('system.theme')
+    $this->config('system.theme')
       ->set('default', 'seven')
       ->save();
 
     // Add cron to the default shortcut set.
-    $this->drupalLogin($this->root_user);
+    $this->drupalLogin($this->rootUser);
     $this->drupalGet('admin/config/system/cron');
     $this->clickLink('Add to Default shortcuts');
 

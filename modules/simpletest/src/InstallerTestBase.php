@@ -78,7 +78,7 @@ abstract class InstallerTestBase extends WebTestBase {
     $this->isInstalled = FALSE;
 
     // Define information about the user 1 account.
-    $this->root_user = new UserSession(array(
+    $this->rootUser = new UserSession(array(
       'uid' => 1,
       'name' => 'admin',
       'mail' => 'admin@example.com',
@@ -94,7 +94,7 @@ abstract class InstallerTestBase extends WebTestBase {
     }
 
     // Note that WebTestBase::installParameters() returns form input values
-    // suitable for a programmed drupal_form_submit().
+    // suitable for a programmed \Drupal::formBuilder()->submitForm().
     // @see WebTestBase::translatePostValues()
     $this->parameters = $this->installParameters();
 

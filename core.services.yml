@@ -32,6 +32,18 @@ services:
     class: Drupal\Core\Cache\TimeZoneCacheContext
     tags:
       - { name: cache.context}
+  cache_tags.invalidator:
+    parent: container.trait
+    class: Drupal\Core\Cache\CacheTagsInvalidator
+    calls:
+      - [setContainer, ['@service_container']]
+    tags:
+      - { name: service_collector, call: addInvalidator, tag: cache_tags_invalidator }
+  cache_tags.invalidator.checksum:
+    class: Drupal\Core\Cache\DatabaseCacheTagsChecksum
+    arguments: ['@database']
+    tags:
+      - { name: cache_tags_invalidator}
   cache.backend.chainedfast:
     class: Drupal\Core\Cache\ChainedFastBackendFactory
     arguments: ['@settings']
@@ -39,12 +51,13 @@ services:
       - [setContainer, ['@service_container']]
   cache.backend.database:
     class: Drupal\Core\Cache\DatabaseBackendFactory
-    arguments: ['@database']
+    arguments: ['@database', '@cache_tags.invalidator.checksum']
   cache.backend.apcu:
     class: Drupal\Core\Cache\ApcuBackendFactory
-    arguments: ['@app.root']
+    arguments: ['@app.root', '@cache_tags.invalidator.checksum']
   cache.backend.php:
     class: Drupal\Core\Cache\PhpBackendFactory
+    arguments: ['@cache_tags.invalidator.checksum']
   cache.bootstrap:
     class: Drupal\Core\Cache\CacheBackendInterface
     tags:
@@ -311,6 +324,11 @@ services:
     parent: container.trait
     tags:
       - { name: plugin_manager_cache_clear }
+  entity_route_subscriber:
+    class: Drupal\Core\EventSubscriber\EntityRouteProviderSubscriber
+    arguments: ['@entity.manager']
+    tags:
+      - { name: event_subscriber }
   entity.definitions.installed:
     class: Drupal\Core\KeyValueStore\KeyValueStoreInterface
     factory_method: get
@@ -322,6 +340,11 @@ services:
   entity.form_builder:
     class: Drupal\Core\Entity\EntityFormBuilder
     arguments: ['@entity.manager', '@form_builder']
+  entity.bundle_config_import_validator:
+    class: Drupal\Core\Entity\Event\BundleConfigImportValidate
+    arguments: ['@config.manager', '@entity.manager']
+    tags:
+      - { name: event_subscriber }
   plugin.manager.block:
     class: Drupal\Core\Block\BlockManager
     parent: default_plugin_manager
@@ -357,10 +380,10 @@ services:
     arguments: ['@menu.link_tree', '@entity.manager', '@string_translation']
   plugin.manager.menu.local_action:
     class: Drupal\Core\Menu\LocalActionManager
-    arguments: ['@controller_resolver', '@request_stack', '@router.route_provider', '@module_handler', '@cache.discovery', '@language_manager', '@access_manager', '@current_user']
+    arguments: ['@controller_resolver', '@request_stack', '@current_route_match', '@router.route_provider', '@module_handler', '@cache.discovery', '@language_manager', '@access_manager', '@current_user']
   plugin.manager.menu.local_task:
     class: Drupal\Core\Menu\LocalTaskManager
-    arguments: ['@controller_resolver', '@request_stack', '@router.route_provider', '@router.builder', '@module_handler', '@cache.discovery', '@language_manager', '@access_manager', '@current_user']
+    arguments: ['@controller_resolver', '@request_stack', '@current_route_match', '@router.route_provider', '@router.builder', '@module_handler', '@cache.discovery', '@language_manager', '@access_manager', '@current_user']
   plugin.manager.menu.contextual_link:
     class: Drupal\Core\Menu\ContextualLinkManager
     arguments: ['@controller_resolver', '@module_handler', '@cache.discovery', '@language_manager', '@access_manager', '@current_user', '@request_stack']
@@ -853,10 +876,6 @@ services:
       - { name: path_processor_inbound, priority: 200 }
       - { name: path_processor_outbound, priority: 200 }
     arguments: ['@config.factory']
-  route_processor_none:
-    class: Drupal\Core\RouteProcessor\RouteProcessorNone
-    tags:
-      - { name: route_processor_outbound, priority: 200 }
   route_processor_current:
     class: Drupal\Core\RouteProcessor\RouteProcessorCurrent
     arguments: ['@current_route_match']

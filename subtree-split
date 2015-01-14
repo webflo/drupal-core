@@ -55,18 +55,14 @@ push_branch() {
   cd $UPSTREAM_DIRECTORY
 
   git checkout $1
+  git pull --rebase
 
-  # When deleting the branch below, we need to be on a different branch (or
-  # commit). Therefore we store the current commit hash, to check it out later.
-  COMMIT_HASH=`git show-ref --hash HEAD`
-
-  # `git subtree split` will return the commit ID of the generated subtree
-  SUBTREE_HASH=`git subtree split -P core`
-  git push $DOWNSTREAM_REPOSITORY $SUBTREE_HASH:$1
+  git subtree split -P core -b subtree-core-$1
+  git push $DOWNSTREAM_REPOSITORY subtree-core-$1:$1
 
   # Clean up so that the next push starts from a clean repository.
-  git checkout $COMMIT_HASH
-  git branch -D $1
+  git checkout $1
+  git branch -D subtree-core-$1
 
   cd ..
 }

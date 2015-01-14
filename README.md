@@ -6,6 +6,9 @@ This is a [Git subtree] (https://github.com/git/git/blob/master/contrib/subtree/
 - One has full control over `index.php`, `.htaccess`, `robots.txt`, etc. as those files will not be overridden by a Drupal core update
 
 ## Usage
+
+*Note: If you are using a legacy version of this repository, please comment in [this issue] (https://github.com/tstoeckler/drupal-core/issues/6)!*
+
 Add the following to your site's `composer.json`:
 ``` json
 {

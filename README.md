@@ -13,7 +13,7 @@ Add the following to your site's `composer.json`:
 ``` json
 {
   "require": {
-    "composer/installers": "dev-master",
+    "composer/installers": "^1.0.20",
     "drupal/drupal-core": "8.0.*"
   },
   "repositories": [

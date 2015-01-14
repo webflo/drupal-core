@@ -96,7 +96,7 @@ cd drupal-core
 
 #### Updating the respository
 ``` bash
-./subtree-split update
+./subtree-split fetch
 ```
 
 #### Publishing the split repository

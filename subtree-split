@@ -16,8 +16,8 @@ help() {
 Commands:
 init			Initializes the Drupal core subsplit in the $UPSTREAM_DIRECTORY
 			directory
-update			Retrieves updates from the upstream repository
-push [branch|tag] ID	Pushes the Drupal core directory of a branch or tag
+fetch			Retrieves updates from the upstream repository
+push [branch|tag] ID	Publishes the Drupal core directory of a branch or tag
 			identified by ID as a subtree to the downstream repository
 help			Show this help text
 "
@@ -33,7 +33,7 @@ init() {
   fi
 }
 
-update() {
+fetch() {
   if [ ! -d $UPSTREAM_DIRECTORY ]
   then
     echo "The upstream repository has not been initialized."
@@ -100,10 +100,16 @@ case "$1" in
     ;;
 
   update)
-    update
+    fetch
     ;;
 
   push)
+    if [ ! -d $UPSTREAM_DIRECTORY ]
+      then
+        echo "The upstream repository has not been initialized."
+        return
+    fi
+
     case "$2" in 
       branch)
         push_branch $3

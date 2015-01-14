@@ -46,6 +46,12 @@ fetch() {
 }
 
 push_branch() {
+  if [ ! -d $UPSTREAM_DIRECTORY ]
+    then
+      echo "The upstream repository has not been initialized."
+      return
+  fi
+
   if [ ! $1 ]
   then
     echo 'Specify the branch to push.'
@@ -68,6 +74,12 @@ push_branch() {
 }
 
 push_tag() {
+  if [ ! -d $UPSTREAM_DIRECTORY ]
+    then
+      echo "The upstream repository has not been initialized."
+      return
+  fi
+
   if [ ! $1 ]
   then
     echo 'Specify the tag to push.'
@@ -99,17 +111,11 @@ case "$1" in
     init
     ;;
 
-  update)
+  fetch)
     fetch
     ;;
 
   push)
-    if [ ! -d $UPSTREAM_DIRECTORY ]
-      then
-        echo "The upstream repository has not been initialized."
-        return
-    fi
-
     case "$2" in 
       branch)
         push_branch $3

@@ -12,47 +12,50 @@ This is a [Git subtree] (https://github.com/git/git/blob/master/contrib/subtree/
 Add the following to your site's `composer.json`:
 ``` json
 {
-  "require": {
-    "composer/installers": "^1.0.20",
-    "drupal/drupal-core": "8.0.*"
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/composer/installers"
-    }
-  ],
-  "extra": {
-    "installer-paths": {
-      "core": ["type:drupal-core"]
-    }
-  }
+    "require": {
+        "composer/installers": "^1.0.20",
+        "drupal/drupal-core": "8.0.*"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+             "url": "https://github.com/composer/installers"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/tstoeckler/drupal-core"
+        }
+    ]
 }
 ```
-(This repository is available on [Packagist] (https://packagist.org/packages/drupal/core), therefore the URL of this repository does not need to be specified explicitly.)
-This will download Drupal's `core` directory into the root of the repository.  If you want your Drupal installation to be in a subdirectory of the repository simply replace `"core"` in the `"installer-paths"` section above with `"web/core"` or similar. Of course any other version declaration supported by Composer works as well, so you can also target a specific tag or commit of this repository.
+### Directory layout
+This will download Drupal's `core` directory into the root of the repository. If a Drupal 8 modules ships with a `composer.json` file, it will be downloaded into the `modules` directory where Drupal expects it. This works analogously for themes or installation profiles.
 
-Many Drupal 8 modules ship with a `composer.json` file so you can add the following to your `composer.json` so that you can pull in all modules which support this via Composer as well, and they will be placed into the `modules` directory where Drupal expects them to be:
+If you want to place Drupal core or modules, themes or installation profiles into different directories you can provide an `"installer-paths"` configuration directive in the `"extra"` section of the `composer.json`. To place the entire Drupal site in a subdirectory of the repository named `web`, for example, use the following:
 ``` json
 {
-  "extra": {
-    "installer-paths": {
-      "modules": ["type:drupal-module"]
+    "extra": {
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/modules": ["type:drupal-module"],
+            "web/profiles": ["type:drupal-profile"],
+            "web/themes": ["type:drupal-theme"]
+        }
     }
-  }
 }
 ```
-This works similarly for themes:
+Or to place modules into a `contrib` subdirectory within the `modules` directory use:
 ``` json
 {
-  "extra": {
-    "installer-paths": {
-      "themes": ["type:drupal-theme"]
+    "extra": {
+        "installer-paths": {
+            "modules/contrib": ["type:drupal-module"]
+        }
     }
-  }
 }
 ```
 
+### Site template
 In order to actually install Drupal you need to copy some files from the upstream Drupal repository into your repository root. The `index.php`, `sites/default/default.services.yml` and `sites/default/default.settings.php` files are required to operate Drupal and the `.htaccess` or `web.config` and the `robots.txt` files are recommended to copy as well. Copy the rest of the files to your liking.
 
 You can copy the files by cloning the upstream Drupal repository and copying them manually or by fetching them directly via the command line. For example:
@@ -63,7 +66,7 @@ wget https://raw.githubusercontent.com/drupal/drupal/8.0.x/index.php
 
 See my [Drupal Site Template] (https://github.com/tstoeckler/drupal-site-template) for an example directory layout with the files needed to install and run Drupal including a `composer.json` file as given above. The template also includes the `index.php` modification and the `drushrc.php` in the way detailed below. Note that this site template follows the best practice of having the Drupal root be in a subdirectory of the repository, which is called `web` in this particular case.
 
-### Drupal's Autoloader
+### Drupal's autoloader
 The upstream Drupal repository contains all Composer dependencies and the Composer autoloader in the `core/vendor` directory. One of the purposes of this repository, however, is to take control of the autoloader used for bootstrapping Drupal. If you have pulled in additional libraries in your `composer.json` you will not be able to autoload them using Drupal's hardcoded autoloader. To instead use the autoloader generated from your `composer.json` for Drupal requests simply change the following line in `index.php`:
 ```php
 $autoloader = require_once __DIR__ . '/core/vendor/autoload.php';
@@ -74,7 +77,7 @@ $autoloader = require_once __DIR__ . '/vendor/autoload.php';
 ```
 Adapting `install.php` (or `authorize.php` or `rebuild.php`) works in the same way, although those are in located in the `core` directory [unfortunately] (https://www.drupal.org/node/2406681) and thus modifications to these files cannot be placed under version control.
 
-### Drush's Autoloader
+### Drush's Drupal autoloader
 When bootstrapping a Drupal site [Drush] (https://github.com/drush-ops/drush) loads Drupal's autoloader and by default uses Drupal's shipped autoloader (`core/vendor/autoload.php`). This, too, defies the purpose of this repository and will lead to fatal errors in case you are using a local Drush version installed from the same `composer.json` as Drupal. To make Drush use the autoloader generated from your `composer.json` call `drush_drupal_load_autoloader()` with the `$new_autoloader` argument from the site's `drushrc.php`. For example:
 ```php
 // In drush/drushrc.php

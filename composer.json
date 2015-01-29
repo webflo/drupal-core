@@ -1,3 +1,5 @@
 {
-    "name": "drupal/core"
+    "name": "drupal/core",
+    "description": "Drupal is an open source content management platform powering millions of websites and applications.",
+    "license": "GPL-2.0+"
 }

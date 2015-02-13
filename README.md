@@ -16,20 +16,12 @@ Add the following to your site's `composer.json`:
         "composer/installers": "^1.0.20",
         "drupal/drupal-core": "8.0.*"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-             "url": "https://github.com/composer/installers"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/tstoeckler/drupal-core"
-        }
-    ]
 }
 ```
+(This repository is available on [Packagist] (https://packagist.org/packages/drupal/core), therefore the URL of this repository does not need to be specified explicitly.)
+
 ### Directory layout
-This will download Drupal's `core` directory into the root of the repository. If a Drupal 8 modules ships with a `composer.json` file, it will be downloaded into the `modules` directory where Drupal expects it. This works analogously for themes or installation profiles.
+This will download Drupal's `core` directory into the root of the repository. If a Drupal 8 modules ships with a `composer.json` file, it will be downloaded into the `modules` directory where Drupal expects it. This works analogously for themes or installation profiles. (That the packages do not get placed into the `vendor` directory is a feature of the `composer/installers` package, therefore it is required.)
 
 If you want to place Drupal core or modules, themes or installation profiles into different directories you can provide an `"installer-paths"` configuration directive in the `"extra"` section of the `composer.json`. To place the entire Drupal site in a subdirectory of the repository named `web`, for example, use the following:
 ``` json

@@ -70,6 +70,9 @@ push_branch() {
   git checkout $1
   git branch -D subtree-core-$1
 
+  # The subtree-cache seems to build up over time, so clear it.
+  rm -r .git/subtree-cache/*
+
   cd ..
 }
 
@@ -101,6 +104,9 @@ push_tag() {
 
   # Clean up so that the next push starts from a clean repository.
   git tag --delete $1
+
+  # The subtree cache seems to build up over time, so clear it.
+  rm -r .git/subtree-cache/*
 
   cd ..
 }

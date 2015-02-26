@@ -7,8 +7,6 @@ This is a [Git subtree] (https://github.com/git/git/blob/master/contrib/subtree/
 
 ## Usage
 
-*Note: If you are using a legacy version of this repository, please comment in [this issue] (https://github.com/tstoeckler/drupal-core/issues/6)!*
-
 Add the following to your site's `composer.json`:
 ``` json
 {

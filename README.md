@@ -77,7 +77,7 @@ The names of the commands are taken from the respective Git commands which they 
 #### Initializing the repository
 ``` bash
 # Clone the repository
-git clone https://github.com/tstoeckler/drupal-core.git
+git clone https://github.com/drupal-composer/drupal-core.git
 cd drupal-core
 
 # Initialize the upstream repository
@@ -105,6 +105,6 @@ like the following:
 ```bash
 UPSTREAM_REPOSITORY=https://github.com/drupal/drupal
 UPSTREAM_DIRECTORY=upstream
-DOWNSTREAM_REPOSITORY=git@github.com:tstoeckler/drupal-core.git
+DOWNSTREAM_REPOSITORY=git@github.com:drupal-composer/drupal-core.git
 ```
 By default the `DOWNSTREAM_REPOSITORY` variable is taken from the `remote.origin.url` Git configuration value so that it does not need to be changed when forking this repository.
